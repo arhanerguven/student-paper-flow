@@ -70,7 +70,9 @@
           // After a message is rendered, trigger MathJax to process any LaTeX
           if (window.MathJax && message.type === 'bot') {
             setTimeout(() => {
-              window.MathJax.typeset && window.MathJax.typeset();
+              if (window.MathJax && window.MathJax.typeset) {
+                window.MathJax.typeset();  // Rerender LaTeX
+              }
             }, 100);
           }
         }
