@@ -30,7 +30,7 @@ serve(async (req) => {
       throw new Error('Mistral API key is not configured');
     }
 
-    // Call Mistral API for OCR and conversion
+    // Call Mistral API for OCR and conversion using their OCR model
     const mistralResponse = await fetch('https://api.mistral.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -38,7 +38,7 @@ serve(async (req) => {
         'Authorization': `Bearer ${mistralApiKey}`,
       },
       body: JSON.stringify({
-        model: 'open-mistral-7b',
+        model: 'mistral-ocr',  // Using the correct OCR-capable model
         messages: [
           {
             role: 'system',
