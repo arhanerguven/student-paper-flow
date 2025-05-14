@@ -17,6 +17,9 @@
     <meta name="twitter:site" content="@lovable_dev" />
     <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
     <link href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css" rel="stylesheet" />
+    <!-- MathJax for LaTeX support -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
   </head>
 
   <body>
@@ -41,9 +44,12 @@
         return 'https://n8n-sjzi.onrender.com/webhook/fc9c7042-c726-4598-b39e-c5abf67fced6/chat';
       };
 
-      // Initialize chat with the webhook URL
+      // Initialize chat with the webhook URL and LaTeX support
       createChat({
-        webhookUrl: getWebhookUrl()
+        webhookUrl: getWebhookUrl(),
+        markdownRenderer: {
+          enableLatex: true
+        }
       });
     </script>
   </body>
