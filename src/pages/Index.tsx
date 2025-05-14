@@ -22,6 +22,22 @@ const Index = () => {
     }
   }, []);
 
+  // Save settings to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('webhookSettings', JSON.stringify(webhookSettings));
+    
+    // Update the chat widget's webhook URL when it changes
+    try {
+      const chatWidget = document.querySelector('n8n-chat');
+      if (chatWidget && webhookSettings.url) {
+        // @ts-ignore - The webhookUrl property exists on the n8n-chat custom element
+        chatWidget.webhookUrl = webhookSettings.url;
+      }
+    } catch (e) {
+      console.error('Error updating chat widget webhook URL:', e);
+    }
+  }, [webhookSettings]);
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
