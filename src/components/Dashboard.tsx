@@ -4,6 +4,7 @@ import FileUploader from './FileUploader';
 import DocumentList from './DocumentList';
 import { Document, WebhookSettings } from '@/lib/types';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 
 interface DashboardProps {
   webhookSettings?: WebhookSettings;
