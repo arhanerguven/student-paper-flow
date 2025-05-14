@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Document } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
@@ -24,7 +23,7 @@ interface FileItemProps {
 export default function FileItem({ document, onDelete }: FileItemProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isConverting, setIsConverting] = useState(false);
-  const [markdown, setMarkdown] = useState<{ content: string; fileName: string } | null>(null);
+  const [extractedText, setExtractedText] = useState<{ content: string; fileName: string } | null>(null);
 
   const fileSize = (): string => {
     const size = document.size;
@@ -72,14 +71,14 @@ export default function FileItem({ document, onDelete }: FileItemProps) {
     }
   };
 
-  const handleConvertToMarkdown = async () => {
+  const handleExtractText = async () => {
     if (!document.url) {
       toast.error("File URL is not available");
       return;
     }
 
     setIsConverting(true);
-    toast.info("Converting PDF to Markdown...", { duration: 10000 });
+    toast.info("Extracting text from PDF...", { duration: 10000 });
 
     try {
       const response = await fetch('https://wlkiguhcafvkccinwvbm.supabase.co/functions/v1/convert-pdf-to-markdown', {
@@ -96,18 +95,18 @@ export default function FileItem({ document, onDelete }: FileItemProps) {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to convert PDF');
+        throw new Error(errorData.error || 'Failed to extract text');
       }
 
       const data = await response.json();
-      setMarkdown({
-        content: data.markdown,
+      setExtractedText({
+        content: data.text,
         fileName: data.fileName
       });
-      toast.success('PDF converted to Markdown successfully');
+      toast.success('Text extracted from PDF successfully');
     } catch (error) {
-      console.error('Error converting PDF to Markdown:', error);
-      toast.error(`Conversion failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error('Error extracting text from PDF:', error);
+      toast.error(`Extraction failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsConverting(false);
     }
@@ -144,12 +143,12 @@ export default function FileItem({ document, onDelete }: FileItemProps) {
                 <span>Download</span>
               </DropdownMenuItem>
               <DropdownMenuItem 
-                onClick={handleConvertToMarkdown} 
+                onClick={handleExtractText} 
                 className="cursor-pointer"
                 disabled={isConverting}
               >
                 <FileText className="mr-2 h-4 w-4" />
-                <span>{isConverting ? 'Converting...' : 'Convert to Markdown'}</span>
+                <span>{isConverting ? 'Extracting text...' : 'Extract Text'}</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem 
@@ -165,12 +164,12 @@ export default function FileItem({ document, onDelete }: FileItemProps) {
         </CardContent>
       </Card>
       
-      {markdown && (
+      {extractedText && (
         <div className="mt-4">
           <MarkdownViewer 
-            markdown={markdown.content} 
-            fileName={markdown.fileName} 
-            onClose={() => setMarkdown(null)} 
+            markdown={extractedText.content} 
+            fileName={extractedText.fileName} 
+            onClose={() => setExtractedText(null)} 
           />
         </div>
       )}

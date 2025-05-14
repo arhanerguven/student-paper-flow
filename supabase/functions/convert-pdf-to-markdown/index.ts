@@ -31,42 +31,23 @@ serve(async (req) => {
       throw new Error('Mistral API key is not configured');
     }
 
-    // Initialize Mistral client - using MistralClient instead of Mistral
+    // Initialize Mistral client with the correct MistralClient class
     const client = new MistralClient(mistralApiKey);
 
-    // Process the PDF document using OCR
+    // Process the PDF document using OCR only
     const ocrResponse = await client.ocr.process({
       model: "mistral-ocr-latest",
       document: {
         type: "document_url",
         documentUrl: pdfUrl
       },
-      includeImageBase64: false
+      includeImageBase64: false // Set to true if you want the base64 images
     });
-
-    // Convert the extracted text to Markdown format
-    const chatResponse = await client.chatCompletions.create({
-      model: "mistral-large-latest",
-      messages: [
-        {
-          role: "system",
-          content: "You are a PDF to Markdown converter. Convert the extracted text from a PDF into well-formatted Markdown, preserving headings, lists, tables, and paragraph structure."
-        },
-        {
-          role: "user",
-          content: `Convert this extracted text from a PDF document into clean, well-formatted Markdown:\n\n${ocrResponse.text}`
-        }
-      ],
-      temperature: 0.1,
-      max_tokens: 4000
-    });
-
-    const markdownContent = chatResponse.choices[0].message.content;
     
     return new Response(
       JSON.stringify({ 
-        markdown: markdownContent,
-        fileName: fileName.replace('.pdf', '.md')
+        text: ocrResponse.text,
+        fileName: fileName.replace('.pdf', '.txt')
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
