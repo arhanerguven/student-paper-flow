@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { ChatContainer, Message } from '@n8n/chat';
+import { Chat, Message as ChatMessage } from '@n8n/chat';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
@@ -12,7 +12,7 @@ interface ChatInterfaceProps {
 }
 
 export default function ChatInterface({ webhookUrl, documentTitle }: ChatInterfaceProps) {
-  const [messages, setMessages] = useState<Message[]>([
+  const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: '1',
       content: `Hello! I can help you with questions about ${documentTitle || 'your documents'}. What would you like to know?`,
@@ -32,7 +32,7 @@ export default function ChatInterface({ webhookUrl, documentTitle }: ChatInterfa
     }
 
     // Add the user message to the chat
-    const userMessage: Message = {
+    const userMessage: ChatMessage = {
       id: Date.now().toString(),
       content: inputValue,
       role: 'user',
@@ -60,7 +60,7 @@ export default function ChatInterface({ webhookUrl, documentTitle }: ChatInterfa
       // In a real implementation, we would get a response from the webhook
       // Here we're simulating a response since we're using no-cors
       setTimeout(() => {
-        const assistantMessage: Message = {
+        const assistantMessage: ChatMessage = {
           id: (Date.now() + 1).toString(),
           content: "I've received your message. In a complete integration, I would provide a response from your n8n workflow. To get actual responses, configure your n8n workflow to process messages and return responses.",
           role: 'assistant',
@@ -86,7 +86,7 @@ export default function ChatInterface({ webhookUrl, documentTitle }: ChatInterfa
       </div>
       
       <div className="flex-1 overflow-auto p-4">
-        <ChatContainer messages={messages} />
+        <Chat messages={messages} />
       </div>
       
       <div className="border-t p-4">
