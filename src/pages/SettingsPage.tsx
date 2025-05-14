@@ -5,9 +5,10 @@ import Settings from '@/components/Settings';
 import { WebhookSettings } from '@/lib/types';
 
 export default function SettingsPage() {
+  const DEFAULT_WEBHOOK_URL = 'https://n8n-sjzi.onrender.com/webhook/fc9c7042-c726-4598-b39e-c5abf67fced6/chat';
   const [webhookSettings, setWebhookSettings] = useState<WebhookSettings>({
-    url: '',
-    enabled: false
+    url: DEFAULT_WEBHOOK_URL,
+    enabled: true
   });
 
   // Load settings from localStorage on component mount
@@ -19,6 +20,9 @@ export default function SettingsPage() {
       } catch (e) {
         console.error('Error parsing saved webhook settings:', e);
       }
+    } else {
+      // If no settings found, save the default ones
+      localStorage.setItem('webhookSettings', JSON.stringify(webhookSettings));
     }
   }, []);
 

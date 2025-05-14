@@ -27,18 +27,18 @@
     <script type="module">
       import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
 
-      // Try to get the webhook URL from localStorage or use a placeholder
+      // Try to get the webhook URL from localStorage or use the provided webhook URL
       const getWebhookUrl = () => {
         const savedSettings = localStorage.getItem('webhookSettings');
         if (savedSettings) {
           try {
             const settings = JSON.parse(savedSettings);
-            return settings.url || 'YOUR_PRODUCTION_WEBHOOK_URL';
+            return settings.url || 'https://n8n-sjzi.onrender.com/webhook/fc9c7042-c726-4598-b39e-c5abf67fced6/chat';
           } catch (e) {
             console.error('Error parsing saved webhook settings:', e);
           }
         }
-        return 'YOUR_PRODUCTION_WEBHOOK_URL';
+        return 'https://n8n-sjzi.onrender.com/webhook/fc9c7042-c726-4598-b39e-c5abf67fced6/chat';
       };
 
       // Initialize chat with the webhook URL

@@ -11,8 +11,9 @@ interface DashboardProps {
 }
 
 export default function Dashboard({ webhookSettings }: DashboardProps) {
+  const DEFAULT_WEBHOOK_URL = 'https://n8n-sjzi.onrender.com/webhook/fc9c7042-c726-4598-b39e-c5abf67fced6/chat';
   const [documents, setDocuments] = useState<Document[]>([]);
-  const [n8nWebhookUrl, setN8nWebhookUrl] = useState<string>('');
+  const [n8nWebhookUrl, setN8nWebhookUrl] = useState<string>(DEFAULT_WEBHOOK_URL);
 
   // Load documents and n8n webhook URL from localStorage on component mount
   useEffect(() => {
@@ -105,7 +106,7 @@ export default function Dashboard({ webhookSettings }: DashboardProps) {
             type="text" 
             value={n8nWebhookUrl} 
             onChange={(e) => setN8nWebhookUrl(e.target.value)}
-            placeholder="https://your-n8n-instance.com/webhook/..."
+            placeholder="https://n8n-sjzi.onrender.com/webhook/fc9c7042-c726-4598-b39e-c5abf67fced6/chat"
             className="flex-1 px-3 py-2 border rounded-md text-sm"
           />
           <Button 

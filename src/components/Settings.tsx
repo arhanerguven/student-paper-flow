@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,9 +14,17 @@ interface SettingsProps {
 }
 
 export default function Settings({ webhookSettings, onSaveWebhook }: SettingsProps) {
-  const [url, setUrl] = useState(webhookSettings.url || '');
+  const DEFAULT_WEBHOOK_URL = 'https://n8n-sjzi.onrender.com/webhook/fc9c7042-c726-4598-b39e-c5abf67fced6/chat';
+  const [url, setUrl] = useState(webhookSettings.url || DEFAULT_WEBHOOK_URL);
   const [enabled, setEnabled] = useState(webhookSettings.enabled);
   const [isSaving, setIsSaving] = useState(false);
+
+  // Set default webhook URL if none is provided
+  useEffect(() => {
+    if (!webhookSettings.url && !url) {
+      setUrl(DEFAULT_WEBHOOK_URL);
+    }
+  }, [webhookSettings.url, url]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,7 +64,7 @@ export default function Settings({ webhookSettings, onSaveWebhook }: SettingsPro
             <Label htmlFor="webhook-url">Webhook URL</Label>
             <Input
               id="webhook-url"
-              placeholder="https://your-n8n-instance.com/webhook/..."
+              placeholder="https://n8n-sjzi.onrender.com/webhook/fc9c7042-c726-4598-b39e-c5abf67fced6/chat"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
             />
