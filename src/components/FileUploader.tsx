@@ -49,6 +49,8 @@ export default function FileUploader({ onFileUpload, webhookUrl }: FileUploaderP
       const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now().toString(36)}.${fileExt}`;
       const filePath = `${fileName}`;
       
+      console.log('Uploading file to Supabase:', filePath);
+      
       // Upload file to Supabase Storage
       const { data, error } = await supabase.storage
         .from('course_pdfs')
@@ -58,8 +60,11 @@ export default function FileUploader({ onFileUpload, webhookUrl }: FileUploaderP
         });
 
       if (error) {
-        throw error;
+        console.error('Supabase upload error:', error);
+        throw new Error(`Upload failed: ${error.message}`);
       }
+
+      console.log('Upload successful, getting public URL');
 
       // Get public URL for the uploaded file
       const { data: { publicUrl } } = supabase.storage
@@ -105,7 +110,8 @@ export default function FileUploader({ onFileUpload, webhookUrl }: FileUploaderP
       onFileUpload(newDocument);
       toast.success(`${file.name} uploaded successfully`);
     } catch (error) {
-      toast.error('Error uploading file');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      toast.error(`Error uploading file: ${errorMessage}`);
       console.error('Upload error:', error);
     } finally {
       setIsUploading(false);
