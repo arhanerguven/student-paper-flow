@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Document } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { formatDistanceToNow } from 'date-fns';
-import { File, MoreHorizontal, Download, Trash } from 'lucide-react';
+import { File, MoreHorizontal, Download, Trash, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import MarkdownViewer from './MarkdownViewer';
 
 interface FileItemProps {
   document: Document;
@@ -22,6 +23,8 @@ interface FileItemProps {
 
 export default function FileItem({ document, onDelete }: FileItemProps) {
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isConverting, setIsConverting] = useState(false);
+  const [markdown, setMarkdown] = useState<{ content: string; fileName: string } | null>(null);
 
   const fileSize = (): string => {
     const size = document.size;
@@ -69,47 +72,108 @@ export default function FileItem({ document, onDelete }: FileItemProps) {
     }
   };
 
-  return (
-    <Card className="hover:shadow-md transition-shadow animate-fade-in">
-      <CardContent className="p-4 flex items-center">
-        <div className="p-2 bg-primary/10 rounded-md mr-4">
-          <File className="h-8 w-8 text-primary" />
-        </div>
-        
-        <div className="flex-1">
-          <h3 className="font-medium text-base truncate" title={document.name}>
-            {document.name}
-          </h3>
-          <div className="flex gap-4 text-sm text-muted-foreground">
-            <span>{fileSize()}</span>
-            <span>{formatDistanceToNow(document.uploadDate, { addSuffix: true })}</span>
-          </div>
-        </div>
+  const handleConvertToMarkdown = async () => {
+    if (!document.url) {
+      toast.error("File URL is not available");
+      return;
+    }
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <MoreHorizontal className="h-4 w-4" />
-              <span className="sr-only">Open menu</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={handleDownload} className="cursor-pointer">
-              <Download className="mr-2 h-4 w-4" />
-              <span>Download</span>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem 
-              onClick={handleDelete} 
-              className="cursor-pointer text-destructive focus:text-destructive"
-              disabled={isDeleting}
-            >
-              <Trash className="mr-2 h-4 w-4" />
-              <span>{isDeleting ? 'Deleting...' : 'Delete'}</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </CardContent>
-    </Card>
+    setIsConverting(true);
+    toast.info("Converting PDF to Markdown...", { duration: 10000 });
+
+    try {
+      const response = await fetch('https://wlkiguhcafvkccinwvbm.supabase.co/functions/v1/convert-pdf-to-markdown', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${supabase.auth.getSession()}`
+        },
+        body: JSON.stringify({
+          pdfUrl: document.url,
+          fileName: document.name
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to convert PDF');
+      }
+
+      const data = await response.json();
+      setMarkdown({
+        content: data.markdown,
+        fileName: data.fileName
+      });
+      toast.success('PDF converted to Markdown successfully');
+    } catch (error) {
+      console.error('Error converting PDF to Markdown:', error);
+      toast.error(`Conversion failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsConverting(false);
+    }
+  };
+
+  return (
+    <>
+      <Card className="hover:shadow-md transition-shadow animate-fade-in">
+        <CardContent className="p-4 flex items-center">
+          <div className="p-2 bg-primary/10 rounded-md mr-4">
+            <File className="h-8 w-8 text-primary" />
+          </div>
+          
+          <div className="flex-1">
+            <h3 className="font-medium text-base truncate" title={document.name}>
+              {document.name}
+            </h3>
+            <div className="flex gap-4 text-sm text-muted-foreground">
+              <span>{fileSize()}</span>
+              <span>{formatDistanceToNow(document.uploadDate, { addSuffix: true })}</span>
+            </div>
+          </div>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <MoreHorizontal className="h-4 w-4" />
+                <span className="sr-only">Open menu</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleDownload} className="cursor-pointer">
+                <Download className="mr-2 h-4 w-4" />
+                <span>Download</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={handleConvertToMarkdown} 
+                className="cursor-pointer"
+                disabled={isConverting}
+              >
+                <FileText className="mr-2 h-4 w-4" />
+                <span>{isConverting ? 'Converting...' : 'Convert to Markdown'}</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem 
+                onClick={handleDelete} 
+                className="cursor-pointer text-destructive focus:text-destructive"
+                disabled={isDeleting}
+              >
+                <Trash className="mr-2 h-4 w-4" />
+                <span>{isDeleting ? 'Deleting...' : 'Delete'}</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </CardContent>
+      </Card>
+      
+      {markdown && (
+        <div className="mt-4">
+          <MarkdownViewer 
+            markdown={markdown.content} 
+            fileName={markdown.fileName} 
+            onClose={() => setMarkdown(null)} 
+          />
+        </div>
+      )}
+    </>
   );
 }

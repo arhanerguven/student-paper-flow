@@ -1,2 +1,5 @@
 
 project_id = "wlkiguhcafvkccinwvbm"
+
+[functions.convert-pdf-to-markdown]
+verify_jwt = false
