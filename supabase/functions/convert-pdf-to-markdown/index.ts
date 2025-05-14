@@ -24,6 +24,7 @@ serve(async (req) => {
     }
 
     console.log(`Processing PDF: ${fileName}`);
+    console.log(`PDF URL: ${pdfUrl}`);
 
     // Get Mistral API key
     const mistralApiKey = Deno.env.get('MISTRAL_API_KEY');
@@ -44,9 +45,28 @@ serve(async (req) => {
       includeImageBase64: false // Set to true if you want the base64 images
     });
     
+    // Log the response structure to help debug
+    console.log("OCR Response structure:", Object.keys(ocrResponse));
+    
+    if (!ocrResponse.text && ocrResponse.pages) {
+      // If text is empty but pages exist, try to extract from pages
+      console.log("Text property empty, trying to extract from pages");
+      const extractedText = ocrResponse.pages.map(page => 
+        page.markdown || page.text || ""
+      ).join("\n\n");
+      
+      return new Response(
+        JSON.stringify({ 
+          text: extractedText,
+          fileName: fileName.replace('.pdf', '.txt')
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
     return new Response(
       JSON.stringify({ 
-        text: ocrResponse.text,
+        text: ocrResponse.text || "No text could be extracted from this PDF",
         fileName: fileName.replace('.pdf', '.txt')
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

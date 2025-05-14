@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Document } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
@@ -85,7 +86,6 @@ export default function FileItem({ document, onDelete }: FileItemProps) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${supabase.auth.getSession()}`
         },
         body: JSON.stringify({
           pdfUrl: document.url,
@@ -99,6 +99,12 @@ export default function FileItem({ document, onDelete }: FileItemProps) {
       }
 
       const data = await response.json();
+      
+      if (!data.text || data.text.trim() === '') {
+        toast.error('No text could be extracted from this PDF');
+        return;
+      }
+      
       setExtractedText({
         content: data.text,
         fileName: data.fileName
