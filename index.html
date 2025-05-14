@@ -60,7 +60,19 @@
       createChat({
         webhookUrl: getWebhookUrl(),
         markdownRenderer: {
-          enableLatex: true
+          enableLatex: true,
+          latexRenderer: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']]
+          }
+        },
+        onMessage: (message) => {
+          // After a message is rendered, trigger MathJax to process any LaTeX
+          if (window.MathJax && message.type === 'bot') {
+            setTimeout(() => {
+              window.MathJax.typeset && window.MathJax.typeset();
+            }, 100);
+          }
         }
       });
     </script>
