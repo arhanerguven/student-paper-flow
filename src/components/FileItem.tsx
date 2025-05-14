@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface FileItemProps {
   document: Document;
@@ -33,18 +34,34 @@ export default function FileItem({ document, onDelete }: FileItemProps) {
     }
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     setIsDeleting(true);
-    // In a real app, you'd make an API call here
-    setTimeout(() => {
+    
+    try {
+      // If we have a storageKey, remove the file from Supabase storage
+      if (document.storageKey) {
+        const { error } = await supabase.storage
+          .from('course_pdfs')
+          .remove([document.storageKey]);
+          
+        if (error) {
+          throw error;
+        }
+      }
+      
+      // Remove the document from local state
       onDelete(document.id);
       toast.success(`${document.name} has been deleted`);
+    } catch (error) {
+      console.error('Error deleting file:', error);
+      toast.error('Failed to delete the file');
+    } finally {
       setIsDeleting(false);
-    }, 500);
+    }
   };
 
   const handleDownload = () => {
-    // In a real app with backend, this would download the actual file
+    // Open the file URL in a new tab for download
     if (document.url) {
       window.open(document.url, '_blank');
     } else {

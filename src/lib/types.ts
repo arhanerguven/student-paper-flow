@@ -5,7 +5,8 @@ export interface Document {
   size: number;
   type: string;
   uploadDate: Date;
-  url?: string;
+  url: string; // URL from Supabase storage
+  storageKey?: string; // Storage path in Supabase
 }
 
 export interface WebhookSettings {

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Upload } from 'lucide-react';
 import { toast } from 'sonner';
 import { Document } from '@/lib/types';
+import { supabase } from '@/integrations/supabase/client';
 
 interface FileUploaderProps {
   onFileUpload: (document: Document) => void;
@@ -43,18 +44,38 @@ export default function FileUploader({ onFileUpload, webhookUrl }: FileUploaderP
     setIsUploading(true);
 
     try {
+      // Generate a unique storage path for this file
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now().toString(36)}.${fileExt}`;
+      const filePath = `${fileName}`;
+      
+      // Upload file to Supabase Storage
+      const { data, error } = await supabase.storage
+        .from('course_pdfs')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (error) {
+        throw error;
+      }
+
+      // Get public URL for the uploaded file
+      const { data: { publicUrl } } = supabase.storage
+        .from('course_pdfs')
+        .getPublicUrl(filePath);
+
       // Create a document object
-      // In a real app, this would be integrated with your backend
       const newDocument: Document = {
         id: `doc-${Date.now().toString(36)}${Math.random().toString(36).substr(2)}`,
         name: file.name,
         size: file.size,
         type: file.type,
         uploadDate: new Date(),
+        url: publicUrl,
+        storageKey: filePath,
       };
-
-      // Simulate upload delay
-      await new Promise(resolve => setTimeout(resolve, 800));
 
       // If webhook URL is defined, call it
       if (webhookUrl) {
@@ -70,7 +91,8 @@ export default function FileUploader({ onFileUpload, webhookUrl }: FileUploaderP
               filename: file.name,
               fileType: file.type,
               fileSize: file.size,
-              uploadTime: new Date().toISOString()
+              uploadTime: new Date().toISOString(),
+              fileUrl: publicUrl
             }),
           });
           console.log('Webhook triggered');
@@ -119,7 +141,7 @@ export default function FileUploader({ onFileUpload, webhookUrl }: FileUploaderP
   return (
     <Card
       className={`border-2 border-dashed p-8 text-center ${
-        isDragging ? 'file-drop-active' : ''
+        isDragging ? 'border-primary bg-primary/5' : ''
       } transition-colors`}
       onDragEnter={handleDragEnter}
       onDragOver={handleDragOver}
