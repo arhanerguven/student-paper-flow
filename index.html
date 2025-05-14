@@ -16,6 +16,7 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@lovable_dev" />
     <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <link href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css" rel="stylesheet" />
   </head>
 
   <body>
@@ -23,5 +24,27 @@
     <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
     <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
     <script type="module" src="/src/main.tsx"></script>
+    <script type="module">
+      import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
+
+      // Try to get the webhook URL from localStorage or use the provided webhook URL
+      const getWebhookUrl = () => {
+        const savedSettings = localStorage.getItem('webhookSettings');
+        if (savedSettings) {
+          try {
+            const settings = JSON.parse(savedSettings);
+            return settings.url || 'https://n8n-sjzi.onrender.com/webhook/fc9c7042-c726-4598-b39e-c5abf67fced6/chat';
+          } catch (e) {
+            console.error('Error parsing saved webhook settings:', e);
+          }
+        }
+        return 'https://n8n-sjzi.onrender.com/webhook/fc9c7042-c726-4598-b39e-c5abf67fced6/chat';
+      };
+
+      // Initialize chat with the webhook URL
+      createChat({
+        webhookUrl: getWebhookUrl()
+      });
+    </script>
   </body>
 </html>
