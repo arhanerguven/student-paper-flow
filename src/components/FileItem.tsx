@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Document } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { formatDistanceToNow } from 'date-fns';
-import { File, MoreHorizontal, Download, Trash, FileText } from 'lucide-react';
+import { File, MoreHorizontal, Download, Trash, FileText, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -24,6 +24,7 @@ interface FileItemProps {
 export default function FileItem({ document, onDelete }: FileItemProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isConverting, setIsConverting] = useState(false);
+  const [isSendingToN8n, setIsSendingToN8n] = useState(false);
   const [extractedText, setExtractedText] = useState<{ content: string; fileName: string } | null>(null);
 
   const fileSize = (): string => {
@@ -118,6 +119,46 @@ export default function FileItem({ document, onDelete }: FileItemProps) {
     }
   };
 
+  const handleSendToN8n = async () => {
+    if (!extractedText) {
+      toast.error("No extracted text available. Please extract text first.");
+      return;
+    }
+    
+    const n8nWebhookUrl = localStorage.getItem('n8nWebhookUrl');
+    if (!n8nWebhookUrl) {
+      toast.error("n8n webhook URL is not configured. Please set it in the dashboard.");
+      return;
+    }
+    
+    setIsSendingToN8n(true);
+    toast.info("Sending to n8n for RAG processing...");
+    
+    try {
+      await fetch(n8nWebhookUrl, {
+        method: 'POST',
+        mode: 'no-cors', // Required for cross-origin calls
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          filename: document.name,
+          extractedText: extractedText.content,
+          documentUrl: document.url,
+          documentId: document.id,
+          uploadTime: document.uploadDate.toISOString(),
+        }),
+      });
+      
+      toast.success('Successfully sent to n8n for RAG processing');
+    } catch (error) {
+      console.error('Error sending to n8n:', error);
+      toast.error('Failed to send to n8n for RAG processing');
+    } finally {
+      setIsSendingToN8n(false);
+    }
+  };
+
   return (
     <>
       <Card className="hover:shadow-md transition-shadow animate-fade-in">
@@ -175,7 +216,9 @@ export default function FileItem({ document, onDelete }: FileItemProps) {
           <MarkdownViewer 
             markdown={extractedText.content} 
             fileName={extractedText.fileName} 
-            onClose={() => setExtractedText(null)} 
+            onClose={() => setExtractedText(null)}
+            onSendToN8n={handleSendToN8n}
+            isSendingToN8n={isSendingToN8n}
           />
         </div>
       )}

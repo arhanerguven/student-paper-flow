@@ -2,16 +2,24 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Download, Copy, X } from 'lucide-react';
+import { Download, Copy, X, Send } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface MarkdownViewerProps {
   markdown: string;
   fileName: string;
   onClose: () => void;
+  onSendToN8n?: () => void;
+  isSendingToN8n?: boolean;
 }
 
-export default function MarkdownViewer({ markdown, fileName, onClose }: MarkdownViewerProps) {
+export default function MarkdownViewer({ 
+  markdown, 
+  fileName, 
+  onClose, 
+  onSendToN8n,
+  isSendingToN8n = false
+}: MarkdownViewerProps) {
   const handleDownload = () => {
     const blob = new Blob([markdown], { type: 'text/markdown' });
     const url = URL.createObjectURL(blob);
@@ -31,6 +39,8 @@ export default function MarkdownViewer({ markdown, fileName, onClose }: Markdown
       .catch(() => toast.error('Failed to copy markdown'));
   };
 
+  const n8nConfigured = !!localStorage.getItem('n8nWebhookUrl');
+
   return (
     <Card className="p-4 relative">
       <div className="flex justify-between items-center mb-4">
@@ -44,6 +54,17 @@ export default function MarkdownViewer({ markdown, fileName, onClose }: Markdown
             <Download className="h-4 w-4 mr-2" />
             Download
           </Button>
+          {onSendToN8n && n8nConfigured && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={onSendToN8n}
+              disabled={isSendingToN8n}
+            >
+              <Send className="h-4 w-4 mr-2" />
+              {isSendingToN8n ? 'Sending...' : 'Send to n8n'}
+            </Button>
+          )}
           <Button variant="ghost" size="sm" onClick={onClose}>
             <X className="h-4 w-4" />
             <span className="sr-only">Close</span>

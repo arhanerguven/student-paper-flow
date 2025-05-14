@@ -8,7 +8,7 @@ import { Document } from '@/lib/types';
 import { supabase } from '@/integrations/supabase/client';
 
 interface FileUploaderProps {
-  onFileUpload: (document: Document) => void;
+  onFileUpload: (document: Document, extractedText?: string) => void;
   webhookUrl?: string;
 }
 
@@ -42,6 +42,7 @@ export default function FileUploader({ onFileUpload, webhookUrl }: FileUploaderP
     }
     
     setIsUploading(true);
+    toast.info("Uploading and processing file...", { duration: 10000 });
 
     try {
       // Generate a unique storage path for this file
@@ -82,13 +83,49 @@ export default function FileUploader({ onFileUpload, webhookUrl }: FileUploaderP
         storageKey: filePath,
       };
 
+      // Automatically extract text from the PDF
+      console.log('Automatically extracting text from PDF');
+      try {
+        const extractionResponse = await fetch('https://wlkiguhcafvkccinwvbm.supabase.co/functions/v1/convert-pdf-to-markdown', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            pdfUrl: publicUrl,
+            fileName: file.name
+          })
+        });
+        
+        if (!extractionResponse.ok) {
+          const errorData = await extractionResponse.json();
+          throw new Error(errorData.error || 'Failed to extract text');
+        }
+        
+        const extractionData = await extractionResponse.json();
+        
+        if (extractionData.text && extractionData.text.trim() !== '') {
+          // If we have extracted text, pass it along with the document
+          onFileUpload(newDocument, extractionData.text);
+          toast.success(`${file.name} uploaded and text extracted successfully`);
+        } else {
+          // If no text could be extracted, just pass the document
+          onFileUpload(newDocument);
+          toast.warning(`${file.name} uploaded, but no text could be extracted`);
+        }
+      } catch (extractionError) {
+        console.error('Error extracting text:', extractionError);
+        // Even if extraction fails, still upload the document
+        onFileUpload(newDocument);
+        toast.warning(`${file.name} uploaded, but text extraction failed`);
+      }
+
       // If webhook URL is defined, call it
       if (webhookUrl) {
         try {
-          // In a production app, this would be handled by your backend
           await fetch(webhookUrl, {
             method: 'POST',
-            mode: 'no-cors', // Required for cross-origin calls from browser
+            mode: 'no-cors',
             headers: {
               'Content-Type': 'application/json',
             },
@@ -106,9 +143,6 @@ export default function FileUploader({ onFileUpload, webhookUrl }: FileUploaderP
           // Continue processing even if webhook fails
         }
       }
-
-      onFileUpload(newDocument);
-      toast.success(`${file.name} uploaded successfully`);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       toast.error(`Error uploading file: ${errorMessage}`);
