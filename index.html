@@ -28,6 +28,25 @@
         },
         svg: {
           fontCache: 'global'
+        },
+        options: {
+          enableMenu: false,
+          renderActions: {
+            addMenu: [], // Disable the menu
+            checkLoading: []
+          }
+        },
+        startup: {
+          // This will be called when MathJax is initially loaded
+          pageReady: () => {
+            window.renderMath = () => {
+              if (window.MathJax && window.MathJax.typeset) {
+                console.log('Re-rendering LaTeX content');
+                window.MathJax.typeset();
+              }
+            };
+            console.log('MathJax ready');
+          }
         }
       };
     </script>
@@ -56,6 +75,14 @@
         return 'https://n8n-sjzi.onrender.com/webhook/fc9c7042-c726-4598-b39e-c5abf67fced6/chat';
       };
 
+      // Function to render math expressions
+      const renderMath = () => {
+        if (window.MathJax && window.MathJax.typeset) {
+          console.log('Rendering LaTeX content');
+          window.MathJax.typeset();
+        }
+      };
+
       // Initialize chat with the webhook URL and LaTeX support
       createChat({
         webhookUrl: getWebhookUrl(),
@@ -68,15 +95,59 @@
         },
         onMessage: (message) => {
           // After a message is rendered, trigger MathJax to process any LaTeX
-          if (window.MathJax && message.type === 'bot') {
+          if (message.type === 'bot') {
+            console.log('Bot message received, processing LaTeX');
+            // Use setTimeout to ensure the DOM has been updated
             setTimeout(() => {
-              if (window.MathJax && window.MathJax.typeset) {
-                window.MathJax.typeset();  // Rerender LaTeX
-              }
-            }, 100);
+              renderMath();
+            }, 200);
           }
+        },
+        onReady: () => {
+          console.log('Chat widget is ready');
+          // Render any initial math content
+          renderMath();
         }
       });
+
+      // Create a MutationObserver to watch for DOM changes
+      const observer = new MutationObserver((mutations) => {
+        let shouldRender = false;
+        
+        for (const mutation of mutations) {
+          // Check if new nodes were added
+          if (mutation.addedNodes.length > 0) {
+            for (const node of mutation.addedNodes) {
+              // Check if the added node might contain chat messages
+              if (node.nodeType === 1 && (
+                node.classList?.contains('n8n-chat-message') || 
+                node.querySelector?.('.n8n-chat-message')
+              )) {
+                shouldRender = true;
+                break;
+              }
+            }
+          }
+          if (shouldRender) break;
+        }
+        
+        if (shouldRender) {
+          console.log('Chat content changed, re-rendering LaTeX');
+          renderMath();
+        }
+      });
+
+      // Start observing the chat container once it's available
+      setTimeout(() => {
+        const chatContainer = document.querySelector('n8n-chat')?.shadowRoot?.querySelector('.n8n-chat-messages');
+        if (chatContainer) {
+          observer.observe(chatContainer, { childList: true, subtree: true });
+          console.log('Observing chat container for changes');
+        }
+      }, 1000);
+
+      // Expose the renderMath function globally
+      window.renderMath = renderMath;
     </script>
   </body>
 </html>
