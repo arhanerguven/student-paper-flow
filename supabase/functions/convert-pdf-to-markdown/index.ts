@@ -1,6 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { Mistral } from "npm:@mistralai/mistralai";
+import { MistralClient } from "npm:@mistralai/mistralai";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -31,8 +31,8 @@ serve(async (req) => {
       throw new Error('Mistral API key is not configured');
     }
 
-    // Initialize Mistral client
-    const client = new Mistral({ apiKey: mistralApiKey });
+    // Initialize Mistral client - using MistralClient instead of Mistral
+    const client = new MistralClient(mistralApiKey);
 
     // Process the PDF document using OCR
     const ocrResponse = await client.ocr.process({
@@ -45,7 +45,7 @@ serve(async (req) => {
     });
 
     // Convert the extracted text to Markdown format
-    const chatResponse = await client.chat({
+    const chatResponse = await client.chatCompletions.create({
       model: "mistral-large-latest",
       messages: [
         {
@@ -58,7 +58,7 @@ serve(async (req) => {
         }
       ],
       temperature: 0.1,
-      maxTokens: 4000
+      max_tokens: 4000
     });
 
     const markdownContent = chatResponse.choices[0].message.content;
