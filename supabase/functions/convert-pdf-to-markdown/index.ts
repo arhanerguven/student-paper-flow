@@ -1,5 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { Mistral } from "npm:@mistralai/mistralai";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -24,55 +25,43 @@ serve(async (req) => {
 
     console.log(`Processing PDF: ${fileName}`);
 
-    // Extract text directly with Mistral API
+    // Get Mistral API key
     const mistralApiKey = Deno.env.get('MISTRAL_API_KEY');
     if (!mistralApiKey) {
       throw new Error('Mistral API key is not configured');
     }
 
-    // Call Mistral API for OCR and conversion using their OCR model
-    const mistralResponse = await fetch('https://api.mistral.ai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${mistralApiKey}`,
+    // Initialize Mistral client
+    const client = new Mistral({ apiKey: mistralApiKey });
+
+    // Process the PDF document using OCR
+    const ocrResponse = await client.ocr.process({
+      model: "mistral-ocr-latest",
+      document: {
+        type: "document_url",
+        documentUrl: pdfUrl
       },
-      body: JSON.stringify({
-        model: 'mistral-ocr',  // Using the correct OCR-capable model
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a PDF to Markdown converter. Extract all text content from the provided PDF and format it in clean Markdown format. Focus on preserving headings, lists, tables, and paragraphs structure.'
-          },
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: `Convert this PDF to well-formatted Markdown. Preserve the document structure.`
-              },
-              {
-                type: 'image_url',
-                image_url: {
-                  url: pdfUrl
-                }
-              }
-            ]
-          }
-        ],
-        temperature: 0.1,
-        max_tokens: 4000
-      }),
+      includeImageBase64: false
     });
 
-    if (!mistralResponse.ok) {
-      const errorData = await mistralResponse.text();
-      console.error('Mistral API error:', errorData);
-      throw new Error(`Mistral API error: ${mistralResponse.statusText}`);
-    }
+    // Convert the extracted text to Markdown format
+    const chatResponse = await client.chat({
+      model: "mistral-large-latest",
+      messages: [
+        {
+          role: "system",
+          content: "You are a PDF to Markdown converter. Convert the extracted text from a PDF into well-formatted Markdown, preserving headings, lists, tables, and paragraph structure."
+        },
+        {
+          role: "user",
+          content: `Convert this extracted text from a PDF document into clean, well-formatted Markdown:\n\n${ocrResponse.text}`
+        }
+      ],
+      temperature: 0.1,
+      maxTokens: 4000
+    });
 
-    const result = await mistralResponse.json();
-    const markdownContent = result.choices[0].message.content;
+    const markdownContent = chatResponse.choices[0].message.content;
     
     return new Response(
       JSON.stringify({ 
