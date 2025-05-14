@@ -3,8 +3,9 @@ import { useState } from 'react';
 import { Document } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { formatDistanceToNow } from 'date-fns';
-import { File, MoreHorizontal, Download, Trash, FileText, Send } from 'lucide-react';
+import { File, MoreHorizontal, Download, Trash, FileText, Send, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -177,37 +178,46 @@ export default function FileItem({ document, onDelete }: FileItemProps) {
             </div>
           </div>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <MoreHorizontal className="h-4 w-4" />
-                <span className="sr-only">Open menu</span>
+          <div className="flex items-center gap-2">
+            <Link to={`/chat/${document.id}`}>
+              <Button variant="outline" size="sm">
+                <MessageSquare className="h-4 w-4 mr-2" />
+                Chat
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={handleDownload} className="cursor-pointer">
-                <Download className="mr-2 h-4 w-4" />
-                <span>Download</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={handleExtractText} 
-                className="cursor-pointer"
-                disabled={isConverting}
-              >
-                <FileText className="mr-2 h-4 w-4" />
-                <span>{isConverting ? 'Extracting text...' : 'Extract Text'}</span>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem 
-                onClick={handleDelete} 
-                className="cursor-pointer text-destructive focus:text-destructive"
-                disabled={isDeleting}
-              >
-                <Trash className="mr-2 h-4 w-4" />
-                <span>{isDeleting ? 'Deleting...' : 'Delete'}</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+            </Link>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <MoreHorizontal className="h-4 w-4" />
+                  <span className="sr-only">Open menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleDownload} className="cursor-pointer">
+                  <Download className="mr-2 h-4 w-4" />
+                  <span>Download</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={handleExtractText} 
+                  className="cursor-pointer"
+                  disabled={isConverting}
+                >
+                  <FileText className="mr-2 h-4 w-4" />
+                  <span>{isConverting ? 'Extracting text...' : 'Extract Text'}</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem 
+                  onClick={handleDelete} 
+                  className="cursor-pointer text-destructive focus:text-destructive"
+                  disabled={isDeleting}
+                >
+                  <Trash className="mr-2 h-4 w-4" />
+                  <span>{isDeleting ? 'Deleting...' : 'Delete'}</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </CardContent>
       </Card>
       
