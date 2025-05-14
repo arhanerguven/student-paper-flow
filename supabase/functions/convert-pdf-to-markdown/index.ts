@@ -1,6 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { MistralClient } from "npm:@mistralai/mistralai";
+import { MistralAI } from "npm:@mistralai/mistralai";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -31,8 +31,8 @@ serve(async (req) => {
       throw new Error('Mistral API key is not configured');
     }
 
-    // Initialize Mistral client with the correct MistralClient class
-    const client = new MistralClient(mistralApiKey);
+    // Initialize Mistral client
+    const client = new MistralAI(mistralApiKey);
 
     // Process the PDF document using OCR only
     const ocrResponse = await client.ocr.process({
