@@ -1,6 +1,5 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import * as base64 from "https://deno.land/std@0.195.0/encoding/base64.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -25,22 +24,13 @@ serve(async (req) => {
 
     console.log(`Processing PDF: ${fileName}`);
 
-    // Fetch the PDF file
-    const pdfResponse = await fetch(pdfUrl);
-    if (!pdfResponse.ok) {
-      throw new Error(`Failed to fetch PDF: ${pdfResponse.statusText}`);
-    }
-
-    // Convert PDF to base64
-    const pdfBuffer = await pdfResponse.arrayBuffer();
-    const base64Pdf = base64.encode(new Uint8Array(pdfBuffer));
-    
-    // Call Mistral API for OCR and conversion
+    // Extract text directly with Mistral API
     const mistralApiKey = Deno.env.get('MISTRAL_API_KEY');
     if (!mistralApiKey) {
       throw new Error('Mistral API key is not configured');
     }
 
+    // Call Mistral API for OCR and conversion
     const mistralResponse = await fetch('https://api.mistral.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -64,7 +54,7 @@ serve(async (req) => {
               {
                 type: 'image_url',
                 image_url: {
-                  url: `data:application/pdf;base64,${base64Pdf}`
+                  url: pdfUrl
                 }
               }
             ]
