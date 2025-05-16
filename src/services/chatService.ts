@@ -13,11 +13,7 @@ export const sendChatMessage = async (
   keysAvailable: boolean
 ): Promise<string> => {
   try {
-    console.log("Sending chat message with keysAvailable:", keysAvailable);
-    
-    if (!keysAvailable) {
-      throw new Error("Server API keys are not available.");
-    }
+    console.log("Sending chat message to external API");
     
     const requestBody = {
       message: message.trim(),
@@ -32,7 +28,7 @@ export const sendChatMessage = async (
       bodyKeys: Object.keys(requestBody) 
     });
 
-    // Call the external API
+    // Call the external API directly
     const response = await fetch('https://example-77lt.onrender.com/chat', {
       method: 'POST',
       headers: {

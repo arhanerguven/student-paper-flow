@@ -67,32 +67,8 @@ const ChatInterface = ({ chatSettings, keysAvailable }: ChatInterfaceProps) => {
     }, 100);
   }, [messages]);
 
-  const validateSettings = () => {
-    console.log("Validating settings, keysAvailable:", keysAvailable);
-    
-    if (!keysAvailable) {
-      toast.error('API keys are not available. Please contact your administrator.');
-      return false;
-    }
-    
-    if (!chatSettings.pineconeEnvironment || !chatSettings.pineconeIndexName) {
-      toast.error('Pinecone environment and index name are required.');
-      return false;
-    }
-    
-    return true;
-  };
-
   const handleSend = async () => {
     if (!input.trim()) return;
-    
-    console.log("Handle send called", { 
-      keysAvailable,
-      pineconeEnv: chatSettings.pineconeEnvironment,
-      pineconeIndex: chatSettings.pineconeIndexName
-    });
-    
-    if (!validateSettings()) return;
     
     const userMessage = { role: 'user' as const, content: input };
     setMessages(prev => [...prev, userMessage]);
@@ -130,15 +106,6 @@ const ChatInterface = ({ chatSettings, keysAvailable }: ChatInterfaceProps) => {
       handleSend();
     }
   };
-
-  // For debugging
-  useEffect(() => {
-    console.log("ChatInterface mounted with props:", { 
-      keysAvailable, 
-      envSet: Boolean(chatSettings.pineconeEnvironment),
-      indexSet: Boolean(chatSettings.pineconeIndexName)
-    });
-  }, [keysAvailable, chatSettings]);
 
   return (
     <div className="flex flex-col h-full">
