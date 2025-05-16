@@ -136,3 +136,22 @@ pre.math {
 code.math.math-inline {
   padding: 0 0.25em;
 }
+
+/* Ensure display math equations are centered */
+.katex-display > .katex {
+  display: flex;
+  justify-content: center;
+  text-align: center;
+}
+
+/* Ensure the LaTeX equations have proper spacing */
+.katex-display {
+  margin: 1.2em 0;
+}
+
+/* Fix for block equations */
+div[class*="math-display"] {
+  overflow-x: auto;
+  max-width: 100%;
+  text-align: center;
+}

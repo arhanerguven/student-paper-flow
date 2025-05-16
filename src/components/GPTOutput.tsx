@@ -10,18 +10,20 @@ interface GPTOutputProps {
 }
 
 export function GPTOutput({ markdown }: GPTOutputProps) {
+  // Process the markdown to ensure LaTeX is properly formatted
+  // This is a simple pre-processor to ensure dollar signs are properly handled
+  const processedMarkdown = markdown
+    // Make sure there are no spaces between $ and the math expression
+    .replace(/\$ (.*?) \$/g, '$$$1$$')
+    .replace(/\$\$ (.*?) \$\$/g, '$$$$1$$');
+
   return (
     <div className="katex-wrapper">
       <ReactMarkdown
         remarkPlugins={[remarkMath]}
         rehypePlugins={[rehypeKatex]}
         components={{
-          code({ node, inline, className, children, ...props }: {
-            node?: any;
-            inline?: boolean;
-            className?: string;
-            children: React.ReactNode;
-          }) {
+          code({ node, inline, className, children, ...props }) {
             const match = /math-display/.exec(className || '');
             if (match) {
               return (
@@ -41,7 +43,7 @@ export function GPTOutput({ markdown }: GPTOutputProps) {
           }
         }}
       >
-        {markdown}
+        {processedMarkdown}
       </ReactMarkdown>
     </div>
   );
