@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Menu, Settings } from 'lucide-react';
+import { Menu, Settings, MessageCircle } from 'lucide-react';
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -29,6 +29,12 @@ export default function Navbar() {
             Dashboard
           </Link>
           <Link 
+            to="/chat" 
+            className="text-sm font-medium transition-colors hover:text-primary"
+          >
+            Chat
+          </Link>
+          <Link 
             to="/settings" 
             className="text-sm font-medium transition-colors hover:text-primary"
           >
@@ -47,6 +53,12 @@ export default function Navbar() {
             <DropdownMenuContent align="end">
               <DropdownMenuItem asChild>
                 <Link to="/">Dashboard</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/chat">
+                  <MessageCircle className="mr-2 h-4 w-4" />
+                  <span>Chat</span>
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link to="/settings">

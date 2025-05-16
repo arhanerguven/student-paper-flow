@@ -16,7 +16,7 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@lovable_dev" />
     <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
-    <link href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css" rel="stylesheet" />
+    
     <!-- MathJax for LaTeX support with SVG output -->
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script>
@@ -58,96 +58,5 @@
     <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
     <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
     <script type="module" src="/src/main.tsx"></script>
-    <script type="module">
-      import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
-
-      // Try to get the webhook URL from localStorage or use the provided webhook URL
-      const getWebhookUrl = () => {
-        const savedSettings = localStorage.getItem('webhookSettings');
-        if (savedSettings) {
-          try {
-            const settings = JSON.parse(savedSettings);
-            return settings.url || 'https://n8n-sjzi.onrender.com/webhook/fc9c7042-c726-4598-b39e-c5abf67fced6/chat';
-          } catch (e) {
-            console.error('Error parsing saved webhook settings:', e);
-          }
-        }
-        return 'https://n8n-sjzi.onrender.com/webhook/fc9c7042-c726-4598-b39e-c5abf67fced6/chat';
-      };
-
-      // Function to render math expressions
-      const renderMath = () => {
-        if (window.MathJax && window.MathJax.typeset) {
-          console.log('Rendering LaTeX content');
-          window.MathJax.typeset();
-        }
-      };
-
-      // Initialize chat with the webhook URL and LaTeX support
-      createChat({
-        webhookUrl: getWebhookUrl(),
-        markdownRenderer: {
-          enableLatex: true,
-          latexRenderer: {
-            inlineMath: [['$', '$'], ['\\(', '\\)']],
-            displayMath: [['$$', '$$'], ['\\[', '\\]']]
-          }
-        },
-        onMessage: (message) => {
-          // After a message is rendered, trigger MathJax to process any LaTeX
-          if (message.type === 'bot') {
-            console.log('Bot message received, processing LaTeX');
-            // Use setTimeout to ensure the DOM has been updated
-            setTimeout(() => {
-              renderMath();
-            }, 200);
-          }
-        },
-        onReady: () => {
-          console.log('Chat widget is ready');
-          // Render any initial math content
-          renderMath();
-        }
-      });
-
-      // Create a MutationObserver to watch for DOM changes
-      const observer = new MutationObserver((mutations) => {
-        let shouldRender = false;
-        
-        for (const mutation of mutations) {
-          // Check if new nodes were added
-          if (mutation.addedNodes.length > 0) {
-            for (const node of mutation.addedNodes) {
-              // Check if the added node might contain chat messages
-              if (node.nodeType === 1 && (
-                node.classList?.contains('n8n-chat-message') || 
-                node.querySelector?.('.n8n-chat-message')
-              )) {
-                shouldRender = true;
-                break;
-              }
-            }
-          }
-          if (shouldRender) break;
-        }
-        
-        if (shouldRender) {
-          console.log('Chat content changed, re-rendering LaTeX');
-          renderMath();
-        }
-      });
-
-      // Start observing the chat container once it's available
-      setTimeout(() => {
-        const chatContainer = document.querySelector('n8n-chat')?.shadowRoot?.querySelector('.n8n-chat-messages');
-        if (chatContainer) {
-          observer.observe(chatContainer, { childList: true, subtree: true });
-          console.log('Observing chat container for changes');
-        }
-      }, 1000);
-
-      // Expose the renderMath function globally
-      window.renderMath = renderMath;
-    </script>
   </body>
 </html>
