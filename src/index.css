@@ -98,3 +98,21 @@
 .file-drop-active {
   @apply border-primary bg-primary/5;
 }
+
+/* KaTeX specific styles */
+.katex-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.katex-wrapper .katex {
+  font-size: 1.1em;
+  text-rendering: auto;
+}
+
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.5em 0;
+  margin: 0.5em 0;
+}
