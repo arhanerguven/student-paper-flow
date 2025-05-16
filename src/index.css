@@ -181,3 +181,23 @@ div[class*="math-display"] {
 p .math-inline {
   margin: 0 0.15em;
 }
+
+/* Improve display of gradient notation and multi-character subscripts */
+.katex .mop {
+  margin-right: 0.1em;
+}
+
+/* Better alignment for subscripts with multiple characters */
+.katex .msubsup {
+  vertical-align: -0.1em;
+}
+
+/* Ensure proper spacing around operators in equations */
+.katex .mbin, .katex .mrel {
+  margin: 0 0.15em;
+}
+
+/* Improve spacing in fraction numerators and denominators */
+.katex .mfrac .mnum, .katex .mfrac .mden {
+  padding: 0.1em 0;
+}
