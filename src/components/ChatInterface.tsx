@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { ChatSettings, Message } from '@/types/chat';
 import { sendChatMessage } from '@/services/chatService';
 import GPTOutput from './GPTOutput';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface ChatInterfaceProps {
   chatSettings: ChatSettings;
@@ -18,6 +19,7 @@ const ChatInterface = ({ chatSettings, keysAvailable }: ChatInterfaceProps) => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Load chat history from localStorage
   useEffect(() => {
@@ -40,6 +42,9 @@ const ChatInterface = ({ chatSettings, keysAvailable }: ChatInterfaceProps) => {
 
   // Scroll to bottom of chat when messages update
   useEffect(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+    }
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
@@ -96,7 +101,10 @@ const ChatInterface = ({ chatSettings, keysAvailable }: ChatInterfaceProps) => {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto mb-4 space-y-4 p-4">
+      <div 
+        ref={scrollContainerRef}
+        className="flex-1 overflow-y-auto mb-4 space-y-4 p-4 chat-messages-container"
+      >
         {messages.length === 0 ? (
           <div className="text-center text-muted-foreground h-full flex items-center justify-center">
             <div>
@@ -129,7 +137,7 @@ const ChatInterface = ({ chatSettings, keysAvailable }: ChatInterfaceProps) => {
                 <div className={`p-1.5 rounded-md ${msg.role === 'assistant' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
                   {msg.role === 'assistant' ? <Bot size={16} /> : <User size={16} />}
                 </div>
-                <div className="text-sm w-full">
+                <div className="chat-message-content text-sm">
                   {msg.role === 'assistant' ? (
                     <div className="prose prose-sm max-w-none dark:prose-invert">
                       <GPTOutput markdown={msg.content} />
@@ -140,9 +148,9 @@ const ChatInterface = ({ chatSettings, keysAvailable }: ChatInterfaceProps) => {
                 </div>
               </div>
             ))}
+            <div ref={messagesEndRef} />
           </>
         )}
-        <div ref={messagesEndRef} />
       </div>
 
       <div className="p-4 border-t">

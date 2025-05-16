@@ -99,10 +99,28 @@
   @apply border-primary bg-primary/5;
 }
 
+/* ChatInterface scrolling styles */
+.chat-messages-container {
+  min-height: 300px;
+  max-height: calc(100vh - 220px);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.chat-message-content {
+  width: 100%;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
 /* KaTeX specific styles */
 .katex-wrapper {
   width: 100%;
   overflow-x: auto;
+  overflow-y: visible;
 }
 
 .katex-wrapper .katex {
@@ -126,6 +144,7 @@
 
 .math-inline {
   display: inline-block;
+  vertical-align: middle;
 }
 
 pre.math {
@@ -154,4 +173,19 @@ div[class*="math-display"] {
   overflow-x: auto;
   max-width: 100%;
   text-align: center;
+}
+
+/* Fix for subscripts in LaTeX */
+.katex .msupsub {
+  text-align: left;
+}
+
+/* Proper alignment for nabla and other operators */
+.katex .mop {
+  margin-right: 0.15em;
+}
+
+/* Better spacing for fractions */
+.katex .mfrac {
+  margin: 0 0.1em;
 }
