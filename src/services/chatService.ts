@@ -19,7 +19,7 @@ export const sendChatMessage = async (
       throw new Error("Server API keys are not available.");
     }
     
-    const requestBody: Record<string, any> = {
+    const requestBody = {
       message: message.trim(),
       chat_history: chatHistory.map(msg => ({
         role: msg.role,
@@ -35,6 +35,9 @@ export const sendChatMessage = async (
     // Call the external API
     const response = await fetch('https://example-77lt.onrender.com/chat', {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify(requestBody)
     });
 
