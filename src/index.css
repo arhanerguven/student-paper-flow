@@ -127,3 +127,12 @@
 .math-inline {
   display: inline-block;
 }
+
+pre.math {
+  text-align: center;
+  padding: 1em 0;
+}
+
+code.math.math-inline {
+  padding: 0 0.25em;
+}

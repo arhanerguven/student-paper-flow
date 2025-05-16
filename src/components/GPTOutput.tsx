@@ -16,13 +16,27 @@ export function GPTOutput({ markdown }: GPTOutputProps) {
         remarkPlugins={[remarkMath]}
         rehypePlugins={[rehypeKatex]}
         components={{
-          // Override how math is rendered to ensure it works
-          math: ({ value }) => (
-            <div dangerouslySetInnerHTML={{ __html: value }} />
-          ),
-          inlineMath: ({ value }) => (
-            <span dangerouslySetInnerHTML={{ __html: value }} />
-          ),
+          code({ node, inline, className, children, ...props }) {
+            // Handle math display blocks
+            const match = /math-display/.exec(className || '');
+            if (match) {
+              return (
+                <div className="math-display">
+                  {children}
+                </div>
+              );
+            }
+            // Handle inline math
+            if (inline && className === 'math') {
+              return <span className="math-inline">{children}</span>;
+            }
+            // Regular code
+            return (
+              <code className={className} {...props}>
+                {children}
+              </code>
+            );
+          }
         }}
       >
         {markdown}
