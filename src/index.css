@@ -92,6 +92,7 @@
 
   body {
     @apply bg-background text-foreground;
+    line-height: 1.6;
   }
 }
 
@@ -119,6 +120,30 @@
   word-break: break-word;
   max-width: 100%;
   overflow-x: hidden; /* Prevent horizontal overflow */
+  line-height: 1.8; /* Increased line height for better readability */
+}
+
+/* Line spacing for markdown content */
+.line-spaced-content {
+  line-height: 1.8;
+}
+
+.line-spaced-content p {
+  margin-bottom: 1.2rem;
+}
+
+.line-spaced-content li {
+  margin-bottom: 0.5rem;
+}
+
+.line-spaced-content h1, 
+.line-spaced-content h2, 
+.line-spaced-content h3, 
+.line-spaced-content h4, 
+.line-spaced-content h5, 
+.line-spaced-content h6 {
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 /* KaTeX container */
@@ -136,6 +161,7 @@
   padding-bottom: 12px;
   max-width: 100%;
   scrollbar-width: thin;
+  line-height: 1.8;
 }
 
 .katex-wrapper .katex {
@@ -147,8 +173,8 @@
 .katex-display {
   overflow-x: auto;
   overflow-y: hidden;
-  padding: 0.5em 0;
-  margin: 0.5em 0;
+  padding: 0.75em 0;
+  margin: 1em 0;
   max-width: 100%;
 }
 
@@ -156,18 +182,20 @@
 .math-display {
   display: block;
   overflow-x: auto;
-  margin: 1em 0;
+  margin: 1.5em 0;
   max-width: 100%;
+  padding: 0.5em 0;
 }
 
 .math-inline {
   display: inline-block;
   vertical-align: middle;
+  padding: 0 0.2em;
 }
 
 pre.math {
   text-align: center;
-  padding: 1em 0;
+  padding: 1.2em 0;
   max-width: 100%;
 }
 
@@ -184,7 +212,7 @@ code.math.math-inline {
 
 /* Ensure the LaTeX equations have proper spacing */
 .katex-display {
-  margin: 1.2em 0;
+  margin: 1.5em 0;
 }
 
 /* Fix for block equations */
@@ -213,6 +241,7 @@ div[class*="math-display"] {
 .chat-message {
   position: relative;
   width: 100%;
+  margin-bottom: 1.2rem;
 }
 
 /* Custom scrollbar styles */

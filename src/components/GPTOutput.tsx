@@ -37,7 +37,14 @@ export function GPTOutput({ markdown }: GPTOutputProps) {
         <ReactMarkdown
           remarkPlugins={[remarkMath]}
           rehypePlugins={[rehypeKatex]}
+          className="line-spaced-content"
           components={{
+            p: ({ node, ...props }) => (
+              <p className="mb-4" {...props} />
+            ),
+            li: ({ node, ...props }) => (
+              <li className="mb-2" {...props} />
+            ),
             code({ node, inline, className, children, ...props }: CodeProps) {
               const match = /math-display/.exec(className || '');
               if (match) {
