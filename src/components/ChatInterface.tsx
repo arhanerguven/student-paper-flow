@@ -30,8 +30,8 @@ const MarkdownWithMath = ({ children }: { children: string }) => {
   
   useEffect(() => {
     // Render math after markdown is rendered
-    if (window.renderMath && containerRef.current) {
-      setTimeout(() => window.renderMath?.(), 100);
+    if (typeof window !== 'undefined' && window.renderMath && containerRef.current) {
+      setTimeout(() => typeof window !== 'undefined' && window.renderMath?.(), 100);
     }
   }, [children]);
   
@@ -77,7 +77,7 @@ const ChatInterface = ({ chatSettings, keysAvailable }: ChatInterfaceProps) => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     // Trigger MathJax rendering after messages are updated
     setTimeout(() => {
-      if (window.renderMath) {
+      if (typeof window !== 'undefined' && window.renderMath) {
         window.renderMath();
       }
     }, 100);

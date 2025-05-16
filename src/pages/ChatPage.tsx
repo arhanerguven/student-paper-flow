@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import ChatInterface from '@/components/ChatInterface';
@@ -40,12 +41,12 @@ const ChatPage = () => {
         
         if (error) {
           console.error('Error checking API keys:', error);
-          toast.error('Failed to check API keys');
+          toast.error('Failed to check API keys: ' + error.message);
           setKeysAvailable(false);
           return;
         }
         
-        if (data.keysAvailable) {
+        if (data && data.keysAvailable) {
           setKeysAvailable(true);
           // Update environment and index name from server while keeping local keys for fallback
           setChatSettings(prev => ({
@@ -53,12 +54,19 @@ const ChatPage = () => {
             pineconeEnvironment: data.pineconeEnvironment,
             pineconeIndexName: data.pineconeIndexName,
           }));
+          toast.success('Using API keys from server configuration');
         } else {
+          const missingKeys = data?.missingKeys || [];
+          if (missingKeys.length > 0) {
+            toast.warning(`Missing API keys on server: ${missingKeys.join(', ')}`);
+          } else {
+            toast.warning('API keys not configured on server');
+          }
           setKeysAvailable(false);
-          toast.warning('API keys not configured in server');
         }
       } catch (error) {
         console.error('Error checking API keys:', error);
+        toast.error('Failed to connect to server');
         setKeysAvailable(false);
       } finally {
         setIsLoadingKeys(false);

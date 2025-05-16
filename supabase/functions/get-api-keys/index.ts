@@ -20,25 +20,30 @@ serve(async (req) => {
     const pineconeIndexName = Deno.env.get('PINECONE_INDEX_NAME');
     
     // Check if all required keys are available
-    if (!openaiApiKey || !pineconeApiKey || !pineconeEnvironment || !pineconeIndexName) {
-      const missingKeys = [];
-      if (!openaiApiKey) missingKeys.push('OPENAI_API_KEY');
-      if (!pineconeApiKey) missingKeys.push('PINECONE_API_KEY');
-      if (!pineconeEnvironment) missingKeys.push('PINECONE_ENVIRONMENT');
-      if (!pineconeIndexName) missingKeys.push('PINECONE_INDEX_NAME');
+    const missingKeys = [];
+    if (!openaiApiKey) missingKeys.push('OPENAI_API_KEY');
+    if (!pineconeApiKey) missingKeys.push('PINECONE_API_KEY');
+    if (!pineconeEnvironment) missingKeys.push('PINECONE_ENVIRONMENT');
+    if (!pineconeIndexName) missingKeys.push('PINECONE_INDEX_NAME');
+    
+    if (missingKeys.length > 0) {
+      console.log(`Missing API keys: ${missingKeys.join(', ')}`);
       
       return new Response(
         JSON.stringify({ 
           error: `Missing API keys: ${missingKeys.join(', ')}`,
+          missingKeys,
           keysAvailable: false
         }),
         { 
-          status: 400, 
+          status: 200, // Changed from 400 to 200 to handle this as a normal response
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       );
     }
 
+    console.log('All API keys are available');
+    
     // Return success response with available keys
     return new Response(
       JSON.stringify({ 
