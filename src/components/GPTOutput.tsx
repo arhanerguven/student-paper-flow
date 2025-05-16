@@ -16,7 +16,12 @@ export function GPTOutput({ markdown }: GPTOutputProps) {
         remarkPlugins={[remarkMath]}
         rehypePlugins={[rehypeKatex]}
         components={{
-          code({ node, inline, className, children, ...props }) {
+          code({ node, inline, className, children, ...props }: {
+            node?: any;
+            inline?: boolean;
+            className?: string;
+            children: React.ReactNode;
+          }) {
             // Handle math display blocks
             const match = /math-display/.exec(className || '');
             if (match) {
