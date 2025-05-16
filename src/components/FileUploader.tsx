@@ -86,15 +86,16 @@ export default function FileUploader({ onFileUpload, webhookUrl }: FileUploaderP
       // Automatically extract text from the PDF
       console.log('Automatically extracting text from PDF');
       try {
-        // Get the authentication headers from Supabase client
-        const { apikey, authorization } = supabase.auth.headers();
+        // Get the authentication headers correctly
+        const { data: sessionData } = await supabase.auth.getSession();
+        const token = sessionData.session?.access_token;
         
         const extractionResponse = await fetch('https://wlkiguhcafvkccinwvbm.supabase.co/functions/v1/convert-pdf-to-markdown', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'apikey': apikey || '',
-            'Authorization': authorization || '',
+            'Authorization': `Bearer ${token || ''}`,
+            'apikey': supabase.supabaseKey,
           },
           body: JSON.stringify({
             pdfUrl: publicUrl,
