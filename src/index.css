@@ -124,63 +124,55 @@
 /* KaTeX container */
 .katex-output-container {
   width: 100%;
-  overflow: hidden;
-  margin: 0.75rem 0;
-  line-height: 1.5;
+  overflow: hidden; /* Contain children overflows */
+  margin-bottom: 8px;
 }
 
 /* KaTeX specific styles */
 .katex-wrapper {
   width: 100%;
   overflow-x: auto;
-  overflow-y: hidden;
-  padding: 0.5rem 0;
+  overflow-y: hidden; /* Change from visible to hidden */
+  padding-bottom: 12px;
   max-width: 100%;
   scrollbar-width: thin;
 }
 
 .katex-wrapper .katex {
-  font-size: 1.15em;
+  font-size: 1.1em;
   text-rendering: auto;
   max-width: 100%;
 }
 
-/* Display math (block equations) */
 .katex-display {
   overflow-x: auto;
   overflow-y: hidden;
-  padding: 1.25rem 0;
-  margin: 1.5rem 0;
+  padding: 0.5em 0;
+  margin: 0.5em 0;
   max-width: 100%;
-  background-color: rgba(0, 0, 0, 0.02);
-  border-radius: 0.5rem;
 }
 
 /* Additional KaTeX fixes */
 .math-display {
   display: block;
   overflow-x: auto;
-  margin: 1.5rem 0;
-  padding: 1rem;
+  margin: 1em 0;
   max-width: 100%;
-  background-color: rgba(0, 0, 0, 0.02);
-  border-radius: 0.5rem;
 }
 
 .math-inline {
   display: inline-block;
   vertical-align: middle;
-  padding: 0 0.25rem;
 }
 
 pre.math {
   text-align: center;
-  padding: 1.5rem 0;
+  padding: 1em 0;
   max-width: 100%;
 }
 
 code.math.math-inline {
-  padding: 0 0.35rem;
+  padding: 0 0.25em;
 }
 
 /* Ensure display math equations are centered */
@@ -188,7 +180,11 @@ code.math.math-inline {
   display: flex;
   justify-content: center;
   text-align: center;
-  margin: 0.5rem 0;
+}
+
+/* Ensure the LaTeX equations have proper spacing */
+.katex-display {
+  margin: 1.2em 0;
 }
 
 /* Fix for block equations */
@@ -196,13 +192,6 @@ div[class*="math-display"] {
   overflow-x: auto;
   max-width: 100%;
   text-align: center;
-  padding: 1rem 0;
-}
-
-/* Paragraphs in chat messages */
-.chat-message-content p {
-  margin-bottom: 1rem;
-  line-height: 1.6;
 }
 
 /* Fix for subscripts in LaTeX */
@@ -212,19 +201,18 @@ div[class*="math-display"] {
 
 /* Proper alignment for nabla and other operators */
 .katex .mop {
-  margin-right: 0.2em;
+  margin-right: 0.15em;
 }
 
 /* Better spacing for fractions */
 .katex .mfrac {
-  margin: 0 0.2em;
+  margin: 0 0.1em;
 }
 
 /* Ensure proper scrolling for the chat interface */
 .chat-message {
   position: relative;
   width: 100%;
-  padding: 0.25rem 0;
 }
 
 /* Custom scrollbar styles */

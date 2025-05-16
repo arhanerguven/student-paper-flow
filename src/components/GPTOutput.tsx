@@ -23,18 +23,13 @@ export function GPTOutput({ markdown }: GPTOutputProps) {
   // Enhanced pre-processor for better LaTeX formatting
   const processedMarkdown = markdown
     // Make sure there are no spaces between $ and the math expression
-    .replace(/\$ (.*?) \$/g, '$ $1 $')
-    .replace(/\$\$ (.*?) \$\$/g, '$$ $1 $$')
+    .replace(/\$ (.*?) \$/g, '$$$1$$')
+    .replace(/\$\$ (.*?) \$\$/g, '$$$$1$$')
     // Handle subscripts better (like \theta_t)
     .replace(/\\([a-zA-Z]+)_([a-zA-Z0-9]+)/g, '\\$1_{$2}')
     // Handle complex math expressions with nabla, etc.
     .replace(/\\nabla/g, '\\nabla ')
-    .replace(/\\frac/g, '\\frac')
-    // Add some spacing before and after math blocks
-    .replace(/\$\$(.*?)\$\$/g, '\n\n$$$1$$\n\n')
-    // Ensure proper spacing around inline math
-    .replace(/([^\s])\$/g, '$1 $')
-    .replace(/\$([^\s])/g, '$ $1');
+    .replace(/\\frac/g, '\\frac');
 
   return (
     <div className="katex-output-container">
