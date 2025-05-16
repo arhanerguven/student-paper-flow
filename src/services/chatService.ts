@@ -15,16 +15,16 @@ export const sendChatMessage = async (
   try {
     console.log("Sending chat message with keysAvailable:", keysAvailable);
     
-    // Always send all required keys regardless of keysAvailable flag
-    // This ensures the API always gets what it needs
+    if (!keysAvailable) {
+      throw new Error("Server API keys are not available.");
+    }
+    
     const requestBody: Record<string, any> = {
       message: message.trim(),
       chat_history: chatHistory.map(msg => ({
         role: msg.role,
         content: msg.content
       })),
-      openai_api_key: chatSettings.openaiApiKey,
-      pinecone_api_key: chatSettings.pineconeApiKey,
       pinecone_environment: chatSettings.pineconeEnvironment,
       pinecone_index_name: chatSettings.pineconeIndexName
     };

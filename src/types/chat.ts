@@ -5,8 +5,6 @@ export interface Message {
 }
 
 export interface ChatSettings {
-  openaiApiKey: string;
-  pineconeApiKey: string;
   pineconeEnvironment: string;
   pineconeIndexName: string;
 }

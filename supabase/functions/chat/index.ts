@@ -16,22 +16,15 @@ serve(async (req) => {
   try {
     console.log("Chat function called");
     
-    // Get API keys from environment variables or request
-    const requestData = await req.json();
+    // Get API keys from environment variables
+    const OPENAI_KEY = Deno.env.get('OPENAI_API_KEY');
+    const PINECONE_API_KEY = Deno.env.get('PINECONE_API_KEY');
     
-    // Get OpenAI key from Supabase secrets or request
-    const OPENAI_KEY = Deno.env.get('OPENAI_API_KEY') || requestData.openai_api_key;
-    
-    // Get Pinecone data
-    const PINECONE_API_KEY = Deno.env.get('PINECONE_API_KEY') || requestData.pinecone_api_key;
-    const PINECONE_ENVIRONMENT = requestData.pinecone_environment;
-    const PINECONE_INDEX_NAME = requestData.pinecone_index_name;
-    
-    // Validate required data
+    // Validate required keys
     if (!OPENAI_KEY) {
-      console.error("Missing OpenAI API key");
+      console.error("Missing OpenAI API key in server environment");
       return new Response(
-        JSON.stringify({ error: 'OpenAI API key not found' }),
+        JSON.stringify({ error: 'OpenAI API key not configured on server' }),
         { 
           status: 400, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -40,9 +33,9 @@ serve(async (req) => {
     }
     
     if (!PINECONE_API_KEY) {
-      console.error("Missing Pinecone API key");
+      console.error("Missing Pinecone API key in server environment");
       return new Response(
-        JSON.stringify({ error: 'Pinecone API key not found' }),
+        JSON.stringify({ error: 'Pinecone API key not configured on server' }),
         { 
           status: 400, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -50,10 +43,15 @@ serve(async (req) => {
       );
     }
     
-    if (!PINECONE_ENVIRONMENT) {
-      console.error("Missing Pinecone environment");
+    // Get request data
+    const requestData = await req.json();
+    const { message, chat_history = [], pinecone_environment, pinecone_index_name } = requestData;
+    
+    // Validate Pinecone environment and index
+    if (!pinecone_environment) {
+      console.error("Missing Pinecone environment in request");
       return new Response(
-        JSON.stringify({ error: 'Pinecone environment not found' }),
+        JSON.stringify({ error: 'Pinecone environment not found in request' }),
         { 
           status: 400, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -61,10 +59,10 @@ serve(async (req) => {
       );
     }
     
-    if (!PINECONE_INDEX_NAME) {
-      console.error("Missing Pinecone index name");
+    if (!pinecone_index_name) {
+      console.error("Missing Pinecone index name in request");
       return new Response(
-        JSON.stringify({ error: 'Pinecone index name not found' }),
+        JSON.stringify({ error: 'Pinecone index name not found in request' }),
         { 
           status: 400, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -73,8 +71,6 @@ serve(async (req) => {
     }
     
     console.log("Request validation passed, calling OpenAI");
-    
-    const { message, chat_history = [] } = requestData;
     
     // Format messages for OpenAI
     const messages = [

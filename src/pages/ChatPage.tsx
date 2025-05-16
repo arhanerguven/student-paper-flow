@@ -4,15 +4,11 @@ import Navbar from '@/components/Navbar';
 import ChatInterface from '@/components/ChatInterface';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Settings, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 interface ChatSettings {
-  openaiApiKey: string;
-  pineconeApiKey: string;
   pineconeEnvironment: string;
   pineconeIndexName: string;
 }
@@ -23,8 +19,6 @@ const ChatPage = () => {
     // Try to load settings from localStorage
     const saved = localStorage.getItem('chatSettings');
     return saved ? JSON.parse(saved) : {
-      openaiApiKey: '',
-      pineconeApiKey: '',
       pineconeEnvironment: '',
       pineconeIndexName: '',
     };
@@ -48,12 +42,11 @@ const ChatPage = () => {
         
         if (data && data.keysAvailable) {
           setKeysAvailable(true);
-          // Update environment and index name from server while keeping local keys for fallback
-          setChatSettings(prev => ({
-            ...prev,
+          // Update environment and index name from server
+          setChatSettings({
             pineconeEnvironment: data.pineconeEnvironment,
             pineconeIndexName: data.pineconeIndexName,
-          }));
+          });
           toast.success('Using API keys from server configuration');
         } else {
           const missingKeys = data?.missingKeys || [];
@@ -75,12 +68,6 @@ const ChatPage = () => {
     
     checkApiKeys();
   }, []);
-
-  const handleSettingChange = (key: keyof ChatSettings, value: string) => {
-    const newSettings = { ...chatSettings, [key]: value };
-    setChatSettings(newSettings);
-    localStorage.setItem('chatSettings', JSON.stringify(newSettings));
-  };
 
   const toggleSettings = () => setShowSettings(!showSettings);
 
@@ -107,68 +94,32 @@ const ChatPage = () => {
           <p className="text-green-500 mb-4">API keys configured on server</p>
         )}
         
+        {!isLoadingKeys && !keysAvailable && (
+          <Card className="p-4 mb-4 bg-red-50 border-red-200">
+            <p className="text-red-500">
+              API keys are not configured on the server. Please contact your administrator.
+            </p>
+          </Card>
+        )}
+        
         {showSettings && (
           <Card className="p-4 mb-4 animate-in fade-in-50">
             <div className="flex justify-between items-center mb-2">
-              <h2 className="text-lg font-semibold">API Settings</h2>
+              <h2 className="text-lg font-semibold">Chat Settings</h2>
               <Button variant="ghost" size="icon" onClick={toggleSettings}>
                 <X size={18} />
               </Button>
             </div>
-            <div className="grid gap-3">
-              <div>
-                <Label htmlFor="openaiApiKey">OpenAI API Key</Label>
-                <Input 
-                  id="openaiApiKey"
-                  type="password" 
-                  placeholder={keysAvailable ? "Using server configuration" : "sk-..."} 
-                  value={chatSettings.openaiApiKey}
-                  onChange={(e) => handleSettingChange('openaiApiKey', e.target.value)}
-                  disabled={keysAvailable}
-                />
-              </div>
-              <div>
-                <Label htmlFor="pineconeApiKey">Pinecone API Key</Label>
-                <Input 
-                  id="pineconeApiKey"
-                  type="password" 
-                  placeholder={keysAvailable ? "Using server configuration" : "..."} 
-                  value={chatSettings.pineconeApiKey}
-                  onChange={(e) => handleSettingChange('pineconeApiKey', e.target.value)}
-                  disabled={keysAvailable}
-                />
-              </div>
-              <div className="flex gap-3">
-                <div className="flex-1">
-                  <Label htmlFor="pineconeEnvironment">Pinecone Environment</Label>
-                  <Input 
-                    id="pineconeEnvironment"
-                    placeholder={keysAvailable ? chatSettings.pineconeEnvironment : "gcp-starter"} 
-                    value={chatSettings.pineconeEnvironment}
-                    onChange={(e) => handleSettingChange('pineconeEnvironment', e.target.value)}
-                    disabled={keysAvailable}
-                  />
-                </div>
-                <div className="flex-1">
-                  <Label htmlFor="pineconeIndexName">Pinecone Index Name</Label>
-                  <Input 
-                    id="pineconeIndexName"
-                    placeholder={keysAvailable ? chatSettings.pineconeIndexName : "your-index"} 
-                    value={chatSettings.pineconeIndexName}
-                    onChange={(e) => handleSettingChange('pineconeIndexName', e.target.value)}
-                    disabled={keysAvailable}
-                  />
-                </div>
-              </div>
-              {keysAvailable ? (
-                <p className="text-sm text-muted-foreground">
-                  Using API keys configured on the server.
-                </p>
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  Your API keys are stored locally in your browser and are only sent to your backend server.
-                </p>
-              )}
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Using Pinecone environment: <strong>{chatSettings.pineconeEnvironment}</strong>
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Using Pinecone index: <strong>{chatSettings.pineconeIndexName}</strong>
+              </p>
+              <p className="text-sm text-muted-foreground">
+                All API keys are managed by the server administrator.
+              </p>
             </div>
           </Card>
         )}
