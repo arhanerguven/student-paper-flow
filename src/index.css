@@ -109,7 +109,7 @@
   overflow-y: auto;
   position: relative; 
   scroll-behavior: smooth;
-  padding-right: 8px; /* Add padding to prevent content touching scrollbar */
+  padding-right: 8px;
 }
 
 .chat-message-content {
@@ -118,24 +118,25 @@
   word-wrap: break-word;
   word-break: break-word;
   max-width: 100%;
-  overflow-x: hidden; /* Prevent horizontal overflow */
+  overflow-x: hidden;
 }
 
 /* KaTeX container */
 .katex-output-container {
   width: 100%;
-  overflow: hidden; /* Contain children overflows */
-  margin-bottom: 8px;
+  overflow: hidden;
+  margin-bottom: 12px;
 }
 
 /* KaTeX specific styles */
 .katex-wrapper {
   width: 100%;
   overflow-x: auto;
-  overflow-y: hidden; /* Change from visible to hidden */
-  padding-bottom: 12px;
+  overflow-y: hidden;
+  padding: 0.5rem 0;
   max-width: 100%;
   scrollbar-width: thin;
+  line-height: 1.6;
 }
 
 .katex-wrapper .katex {
@@ -147,8 +148,8 @@
 .katex-display {
   overflow-x: auto;
   overflow-y: hidden;
-  padding: 0.5em 0;
-  margin: 0.5em 0;
+  padding: 1em 0;
+  margin: 1em 0;
   max-width: 100%;
 }
 
@@ -156,18 +157,23 @@
 .math-display {
   display: block;
   overflow-x: auto;
-  margin: 1em 0;
+  margin: 1.5em 0;
+  padding: 1em 0;
   max-width: 100%;
+  background-color: rgba(0, 0, 0, 0.02);
+  border-radius: 6px;
 }
 
 .math-inline {
   display: inline-block;
   vertical-align: middle;
+  padding: 0 0.25em;
+  margin: 0 0.15em;
 }
 
 pre.math {
   text-align: center;
-  padding: 1em 0;
+  padding: 1.5em 0;
   max-width: 100%;
 }
 
@@ -184,7 +190,7 @@ code.math.math-inline {
 
 /* Ensure the LaTeX equations have proper spacing */
 .katex-display {
-  margin: 1.2em 0;
+  margin: 1.5em 0;
 }
 
 /* Fix for block equations */
@@ -206,13 +212,18 @@ div[class*="math-display"] {
 
 /* Better spacing for fractions */
 .katex .mfrac {
-  margin: 0 0.1em;
+  margin: 0.2em 0.1em;
 }
 
 /* Ensure proper scrolling for the chat interface */
 .chat-message {
   position: relative;
   width: 100%;
+  line-height: 1.6;
+}
+
+.chat-message p {
+  margin-bottom: 1em;
 }
 
 /* Custom scrollbar styles */

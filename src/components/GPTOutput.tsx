@@ -4,7 +4,6 @@ import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
-import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface GPTOutputProps {
   markdown: string;
@@ -25,6 +24,10 @@ export function GPTOutput({ markdown }: GPTOutputProps) {
     // Make sure there are no spaces between $ and the math expression
     .replace(/\$ (.*?) \$/g, '$$$1$$')
     .replace(/\$\$ (.*?) \$\$/g, '$$$$1$$')
+    // Add spacing before and after display math
+    .replace(/\$\$(.*?)\$\$/g, '\n\n$$\n$1\n$$\n\n')
+    // Improve spacing around inline math
+    .replace(/([^\n])\$([^$]+)\$/g, '$1 $$$2$$ ')
     // Handle subscripts better (like \theta_t)
     .replace(/\\([a-zA-Z]+)_([a-zA-Z0-9]+)/g, '\\$1_{$2}')
     // Handle complex math expressions with nabla, etc.
@@ -55,6 +58,9 @@ export function GPTOutput({ markdown }: GPTOutputProps) {
                   {children}
                 </code>
               );
+            },
+            p({ children }) {
+              return <p className="mb-4">{children}</p>;
             }
           }}
         >
