@@ -6,23 +6,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import ReactMarkdown from 'react-markdown';
 import { supabase } from '@/integrations/supabase/client';
-
-interface ChatSettings {
-  openaiApiKey: string;
-  pineconeApiKey: string;
-  pineconeEnvironment: string;
-  pineconeIndexName: string;
-}
-
-interface Message {
-  role: 'user' | 'assistant';
-  content: string;
-}
-
-interface ChatResponse {
-  response: string;
-  chat_history: Array<{ role: string; content: string }>;
-}
+import { Message, ChatSettings } from '@/types/chat';
+import { sendChatMessage } from '@/services/chatService';
 
 // Custom component to handle markdown and math rendering
 const MarkdownWithMath = ({ children }: { children: string }) => {
@@ -121,55 +106,17 @@ const ChatInterface = ({ chatSettings, keysAvailable }: ChatInterfaceProps) => {
     setIsLoading(true);
 
     try {
-      // Convert previous messages to the format expected by the API
-      const chatHistory = messages.map(msg => ({
-        role: msg.role,
-        content: msg.content
-      }));
-
-      // Prepare the API request body based on whether keys are available from server
-      let body = {};
-      
-      if (keysAvailable) {
-        // For server-side keys, we need to include the environment and index name from the server
-        // These are returned by the get-api-keys function
-        body = {
-          message: userMessage.content.trim(),
-          chat_history: chatHistory,
-          pinecone_environment: chatSettings.pineconeEnvironment,
-          pinecone_index_name: chatSettings.pineconeIndexName
-        };
-      } else {
-        // If using client-side keys, send them in the request
-        body = {
-          message: userMessage.content.trim(),
-          openai_api_key: chatSettings.openaiApiKey,
-          pinecone_api_key: chatSettings.pineconeApiKey,
-          pinecone_environment: chatSettings.pineconeEnvironment,
-          pinecone_index_name: chatSettings.pineconeIndexName,
-          chat_history: chatHistory
-        };
-      }
-
-      // Call the external API
-      const response = await fetch('https://example-77lt.onrender.com/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`Error ${response.status}: ${errorData.detail || response.statusText}`);
-      }
-
-      const data: ChatResponse = await response.json();
+      // Send message using the chat service
+      const response = await sendChatMessage(
+        userMessage.content,
+        messages,
+        chatSettings,
+        keysAvailable
+      );
       
       const assistantMessage = { 
         role: 'assistant' as const, 
-        content: data.response 
+        content: response 
       };
       
       setMessages(prev => [...prev, assistantMessage]);
