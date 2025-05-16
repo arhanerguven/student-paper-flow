@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { SendIcon, Bot, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -42,10 +41,15 @@ const ChatInterface = ({ chatSettings, keysAvailable }: ChatInterfaceProps) => {
 
   // Scroll to bottom of chat when messages update
   useEffect(() => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
-    }
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // Use a timeout to ensure the DOM has updated before scrolling
+    const timeoutId = setTimeout(() => {
+      if (scrollContainerRef.current) {
+        scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+      }
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+    
+    return () => clearTimeout(timeoutId);
   }, [messages]);
 
   const handleSend = async () => {
@@ -132,7 +136,7 @@ const ChatInterface = ({ chatSettings, keysAvailable }: ChatInterfaceProps) => {
                 key={idx}
                 className={`flex items-start gap-3 ${
                   msg.role === 'assistant' ? 'bg-muted/50 rounded-lg p-3' : 'p-2'
-                }`}
+                } chat-message`}
               >
                 <div className={`p-1.5 rounded-md ${msg.role === 'assistant' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
                   {msg.role === 'assistant' ? <Bot size={16} /> : <User size={16} />}
@@ -148,7 +152,7 @@ const ChatInterface = ({ chatSettings, keysAvailable }: ChatInterfaceProps) => {
                 </div>
               </div>
             ))}
-            <div ref={messagesEndRef} />
+            <div ref={messagesEndRef} className="h-1" />
           </>
         )}
       </div>

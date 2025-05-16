@@ -107,6 +107,8 @@
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  position: relative; /* Ensure proper positioning context */
+  scroll-behavior: smooth;
 }
 
 .chat-message-content {
@@ -114,6 +116,7 @@
   overflow-wrap: break-word;
   word-wrap: break-word;
   word-break: break-word;
+  max-width: 100%;
 }
 
 /* KaTeX specific styles */
@@ -121,11 +124,13 @@
   width: 100%;
   overflow-x: auto;
   overflow-y: visible;
+  padding-bottom: 8px;
 }
 
 .katex-wrapper .katex {
   font-size: 1.1em;
   text-rendering: auto;
+  max-width: 100%;
 }
 
 .katex-display {
@@ -133,6 +138,7 @@
   overflow-y: hidden;
   padding: 0.5em 0;
   margin: 0.5em 0;
+  max-width: 100%;
 }
 
 /* Additional KaTeX fixes */
@@ -140,6 +146,7 @@
   display: block;
   overflow-x: auto;
   margin: 1em 0;
+  max-width: 100%;
 }
 
 .math-inline {
@@ -150,6 +157,7 @@
 pre.math {
   text-align: center;
   padding: 1em 0;
+  max-width: 100%;
 }
 
 code.math.math-inline {
@@ -188,4 +196,10 @@ div[class*="math-display"] {
 /* Better spacing for fractions */
 .katex .mfrac {
   margin: 0 0.1em;
+}
+
+/* Ensure proper scrolling for the chat interface */
+.chat-message {
+  position: relative;
+  width: 100%;
 }

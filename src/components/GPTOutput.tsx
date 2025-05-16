@@ -33,32 +33,34 @@ export function GPTOutput({ markdown }: GPTOutputProps) {
 
   return (
     <div className="katex-wrapper">
-      <ReactMarkdown
-        remarkPlugins={[remarkMath]}
-        rehypePlugins={[rehypeKatex]}
-        components={{
-          code({ node, inline, className, children, ...props }: CodeProps) {
-            const match = /math-display/.exec(className || '');
-            if (match) {
+      <ScrollArea className="overflow-visible">
+        <ReactMarkdown
+          remarkPlugins={[remarkMath]}
+          rehypePlugins={[rehypeKatex]}
+          components={{
+            code({ node, inline, className, children, ...props }: CodeProps) {
+              const match = /math-display/.exec(className || '');
+              if (match) {
+                return (
+                  <div className="math-display">
+                    {children}
+                  </div>
+                );
+              }
+              if (inline && className === 'math') {
+                return <span className="math-inline">{children}</span>;
+              }
               return (
-                <div className="math-display">
+                <code className={className} {...props}>
                   {children}
-                </div>
+                </code>
               );
             }
-            if (inline && className === 'math') {
-              return <span className="math-inline">{children}</span>;
-            }
-            return (
-              <code className={className} {...props}>
-                {children}
-              </code>
-            );
-          }
-        }}
-      >
-        {processedMarkdown}
-      </ReactMarkdown>
+          }}
+        >
+          {processedMarkdown}
+        </ReactMarkdown>
+      </ScrollArea>
     </div>
   );
 }
