@@ -12,10 +12,11 @@ interface GPTOutputProps {
 export function GPTOutput({ markdown }: GPTOutputProps) {
   return (
     <ReactMarkdown
-      children={markdown}
       remarkPlugins={[remarkMath]}
       rehypePlugins={[rehypeKatex]}
-    />
+    >
+      {markdown}
+    </ReactMarkdown>
   );
 }
 
