@@ -127,24 +127,28 @@ const ChatInterface = ({ chatSettings, keysAvailable }: ChatInterfaceProps) => {
         content: msg.content
       }));
 
-      let body;
+      // Prepare the API request body based on whether keys are available from server
+      let body = {};
       
       if (keysAvailable) {
-        // If keys are available on server, don't send them in the request
-        body = JSON.stringify({
+        // For server-side keys, we need to include the environment and index name from the server
+        // These are returned by the get-api-keys function
+        body = {
           message: userMessage.content.trim(),
-          chat_history: chatHistory
-        });
+          chat_history: chatHistory,
+          pinecone_environment: chatSettings.pineconeEnvironment,
+          pinecone_index_name: chatSettings.pineconeIndexName
+        };
       } else {
         // If using client-side keys, send them in the request
-        body = JSON.stringify({
+        body = {
           message: userMessage.content.trim(),
           openai_api_key: chatSettings.openaiApiKey,
           pinecone_api_key: chatSettings.pineconeApiKey,
           pinecone_environment: chatSettings.pineconeEnvironment,
           pinecone_index_name: chatSettings.pineconeIndexName,
           chat_history: chatHistory
-        });
+        };
       }
 
       // Call the external API
@@ -153,11 +157,12 @@ const ChatInterface = ({ chatSettings, keysAvailable }: ChatInterfaceProps) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body
+        body: JSON.stringify(body)
       });
 
       if (!response.ok) {
-        throw new Error(`Error: ${response.statusText}`);
+        const errorData = await response.json();
+        throw new Error(`Error ${response.status}: ${errorData.detail || response.statusText}`);
       }
 
       const data: ChatResponse = await response.json();
