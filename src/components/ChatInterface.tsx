@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { SendIcon, Bot, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -6,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import ReactMarkdown from 'react-markdown';
 
 // Declare the renderMath function on window
 declare global {
@@ -84,7 +84,7 @@ const ChatInterface = () => {
           <div className="text-center text-muted-foreground h-full flex items-center justify-center">
             <div>
               <Bot className="mx-auto h-12 w-12 mb-2 opacity-50" />
-              <p>Ask me anything! I can render math like $E=mc^2$ too.</p>
+              <p>Ask me anything! I can render math like $E=mc^2$ and markdown too.</p>
             </div>
           </div>
         ) : (
@@ -98,7 +98,11 @@ const ChatInterface = () => {
               <div className={`p-1.5 rounded-md ${msg.role === 'assistant' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
                 {msg.role === 'assistant' ? <Bot size={16} /> : <User size={16} />}
               </div>
-              <div className="text-sm whitespace-pre-wrap">{msg.content}</div>
+              <div className="text-sm prose prose-sm max-w-none dark:prose-invert">
+                <ReactMarkdown>
+                  {msg.content}
+                </ReactMarkdown>
+              </div>
             </div>
           ))
         )}
