@@ -24,8 +24,7 @@ export const sendChatMessage = async (
       chat_history: chatHistory.map(msg => ({
         role: msg.role,
         content: msg.content
-      })),
-      pinecone_index_name: chatSettings.pineconeIndexName
+      }))
     };
     
     console.log("Sending request to chat API", { 

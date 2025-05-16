@@ -20,6 +20,7 @@ serve(async (req) => {
     const OPENAI_KEY = Deno.env.get('OPENAI_API_KEY');
     const PINECONE_API_KEY = Deno.env.get('PINECONE_API_KEY');
     const PINECONE_ENVIRONMENT = Deno.env.get('PINECONE_ENVIRONMENT');
+    const PINECONE_INDEX_NAME = Deno.env.get('PINECONE_INDEX_NAME');
     
     // Validate required keys
     if (!OPENAI_KEY) {
@@ -55,21 +56,20 @@ serve(async (req) => {
       );
     }
     
-    // Get request data
-    const requestData = await req.json();
-    const { message, chat_history = [], pinecone_index_name } = requestData;
-    
-    // Validate Pinecone index
-    if (!pinecone_index_name) {
-      console.error("Missing Pinecone index name in request");
+    if (!PINECONE_INDEX_NAME) {
+      console.error("Missing Pinecone index name in server environment");
       return new Response(
-        JSON.stringify({ error: 'Pinecone index name not found in request' }),
+        JSON.stringify({ error: 'Pinecone index name not configured on server' }),
         { 
           status: 400, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       );
     }
+    
+    // Get request data
+    const requestData = await req.json();
+    const { message, chat_history = [] } = requestData;
     
     console.log("Request validation passed, calling OpenAI");
     
