@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { SendIcon, Bot, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -70,42 +69,26 @@ const ChatInterface = ({ chatSettings, keysAvailable }: ChatInterfaceProps) => {
   const validateSettings = () => {
     console.log("Validating settings, keysAvailable:", keysAvailable);
     
-    if (keysAvailable) {
-      console.log("Using server-side keys");
-      // Still validate required fields for server-side operation
-      if (!chatSettings.pineconeEnvironment) {
-        toast.error('Pinecone environment is required even with server keys');
-        return false;
-      }
-      
-      if (!chatSettings.pineconeIndexName) {
-        toast.error('Pinecone index name is required even with server keys');
-        return false;
-      }
-      
-      return true;
-    }
-    
-    // Client-side keys validation
-    const { openaiApiKey, pineconeApiKey, pineconeEnvironment, pineconeIndexName } = chatSettings;
-    
-    if (!openaiApiKey) {
-      toast.error('OpenAI API key is required');
-      return false;
-    }
-    
-    if (!pineconeApiKey) {
-      toast.error('Pinecone API key is required');
-      return false;
-    }
-    
-    if (!pineconeEnvironment) {
+    // Always validate the Pinecone settings regardless of keysAvailable
+    if (!chatSettings.pineconeEnvironment) {
       toast.error('Pinecone environment is required');
       return false;
     }
     
-    if (!pineconeIndexName) {
+    if (!chatSettings.pineconeIndexName) {
       toast.error('Pinecone index name is required');
+      return false;
+    }
+    
+    // Check OpenAI API key and Pinecone API key regardless of keysAvailable
+    // We'll try to use them anyway since the server seems to require them
+    if (!chatSettings.openaiApiKey) {
+      toast.error('OpenAI API key is required');
+      return false;
+    }
+    
+    if (!chatSettings.pineconeApiKey) {
+      toast.error('Pinecone API key is required');
       return false;
     }
     
@@ -118,7 +101,9 @@ const ChatInterface = ({ chatSettings, keysAvailable }: ChatInterfaceProps) => {
     console.log("Handle send called", { 
       keysAvailable,
       pineconeEnv: chatSettings.pineconeEnvironment,
-      pineconeIndex: chatSettings.pineconeIndexName 
+      pineconeIndex: chatSettings.pineconeIndexName,
+      hasOpenAIKey: Boolean(chatSettings.openaiApiKey),
+      hasPineconeKey: Boolean(chatSettings.pineconeApiKey)
     });
     
     if (!validateSettings()) return;
@@ -165,7 +150,9 @@ const ChatInterface = ({ chatSettings, keysAvailable }: ChatInterfaceProps) => {
     console.log("ChatInterface mounted with props:", { 
       keysAvailable, 
       envSet: Boolean(chatSettings.pineconeEnvironment),
-      indexSet: Boolean(chatSettings.pineconeIndexName)
+      indexSet: Boolean(chatSettings.pineconeIndexName),
+      hasOpenAIKey: Boolean(chatSettings.openaiApiKey),
+      hasPineconeKey: Boolean(chatSettings.pineconeApiKey)
     });
   }, [keysAvailable, chatSettings]);
 

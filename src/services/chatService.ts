@@ -15,33 +15,20 @@ export const sendChatMessage = async (
   try {
     console.log("Sending chat message with keysAvailable:", keysAvailable);
     
-    // Prepare the request body based on whether server-side keys are available
-    let requestBody: Record<string, any> = {
+    // Always send all required keys regardless of keysAvailable flag
+    // This ensures the API always gets what it needs
+    const requestBody: Record<string, any> = {
       message: message.trim(),
       chat_history: chatHistory.map(msg => ({
         role: msg.role,
         content: msg.content
-      }))
+      })),
+      openai_api_key: chatSettings.openaiApiKey,
+      pinecone_api_key: chatSettings.pineconeApiKey,
+      pinecone_environment: chatSettings.pineconeEnvironment,
+      pinecone_index_name: chatSettings.pineconeIndexName
     };
     
-    if (!keysAvailable) {
-      // When using client-side keys, include all API keys
-      requestBody = {
-        ...requestBody,
-        openai_api_key: chatSettings.openaiApiKey,
-        pinecone_api_key: chatSettings.pineconeApiKey,
-        pinecone_environment: chatSettings.pineconeEnvironment,
-        pinecone_index_name: chatSettings.pineconeIndexName
-      };
-    } else {
-      // When using server-side keys, still include environment and index name
-      requestBody = {
-        ...requestBody,
-        pinecone_environment: chatSettings.pineconeEnvironment,
-        pinecone_index_name: chatSettings.pineconeIndexName
-      };
-    }
-
     console.log("Sending request to chat API", { 
       url: 'https://example-77lt.onrender.com/chat',
       bodyKeys: Object.keys(requestBody) 
