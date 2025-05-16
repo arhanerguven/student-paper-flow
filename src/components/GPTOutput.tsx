@@ -25,6 +25,9 @@ export function GPTOutput({ markdown }: GPTOutputProps) {
     // Make sure there are no spaces between $ and the math expression
     .replace(/\$ (.*?) \$/g, '$$$1$$')
     .replace(/\$\$ (.*?) \$\$/g, '$$$$1$$')
+    // Add spaces before and after inline LaTeX expressions
+    .replace(/(\w)\$/g, '$1 $')
+    .replace(/\$(\w)/g, '$ $1')
     // Handle subscripts better (like \theta_t)
     .replace(/\\([a-zA-Z]+)_([a-zA-Z0-9]+)/g, '\\$1_{$2}')
     // Handle complex math expressions with nabla, etc.
