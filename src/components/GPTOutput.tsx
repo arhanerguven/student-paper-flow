@@ -9,6 +9,15 @@ interface GPTOutputProps {
   markdown: string;
 }
 
+// Define the code component props type
+interface CodeProps {
+  node?: any;
+  inline?: boolean;
+  className?: string;
+  children: React.ReactNode;
+  [key: string]: any;
+}
+
 export function GPTOutput({ markdown }: GPTOutputProps) {
   // Process the markdown to ensure LaTeX is properly formatted
   // This is a simple pre-processor to ensure dollar signs are properly handled
@@ -23,7 +32,7 @@ export function GPTOutput({ markdown }: GPTOutputProps) {
         remarkPlugins={[remarkMath]}
         rehypePlugins={[rehypeKatex]}
         components={{
-          code({ node, inline, className, children, ...props }) {
+          code({ node, inline, className, children, ...props }: CodeProps) {
             const match = /math-display/.exec(className || '');
             if (match) {
               return (
