@@ -19,12 +19,14 @@ interface CodeProps {
 }
 
 export function GPTOutput({ markdown }: GPTOutputProps) {
-  // Process the markdown to ensure LaTeX is properly formatted
-  // This is a simple pre-processor to ensure dollar signs are properly handled
+  // Enhanced pre-processor to better handle LaTeX expressions
   const processedMarkdown = markdown
     // Make sure there are no spaces between $ and the math expression
     .replace(/\$ (.*?) \$/g, '$$$1$$')
-    .replace(/\$\$ (.*?) \$\$/g, '$$$$1$$');
+    .replace(/\$\$ (.*?) \$\$/g, '$$$$1$$')
+    // Handle LaTeX expressions that might not be correctly formatted
+    .replace(/\(\\theta_([a-z0-9])\)/g, '$\\theta_{$1}$')
+    .replace(/\\theta_([a-z0-9])/g, '\\theta_{$1}');
 
   return (
     <div className="katex-wrapper">

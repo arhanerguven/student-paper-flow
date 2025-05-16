@@ -155,3 +155,12 @@ div[class*="math-display"] {
   max-width: 100%;
   text-align: center;
 }
+
+/* Improved subscript and superscript rendering */
+.katex .msupsub {
+  text-align: left;
+}
+
+.katex .mord.mtight {
+  vertical-align: 0.2em;
+}
