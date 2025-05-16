@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import ReactMarkdown from 'react-markdown';
-import { supabase } from '@/integrations/supabase/client';
 import { Message, ChatSettings } from '@/types/chat';
 import { sendChatMessage } from '@/services/chatService';
 
@@ -69,8 +68,25 @@ const ChatInterface = ({ chatSettings, keysAvailable }: ChatInterfaceProps) => {
   }, [messages]);
 
   const validateSettings = () => {
-    if (keysAvailable) return true;
+    console.log("Validating settings, keysAvailable:", keysAvailable);
     
+    if (keysAvailable) {
+      console.log("Using server-side keys");
+      // Still validate required fields for server-side operation
+      if (!chatSettings.pineconeEnvironment) {
+        toast.error('Pinecone environment is required even with server keys');
+        return false;
+      }
+      
+      if (!chatSettings.pineconeIndexName) {
+        toast.error('Pinecone index name is required even with server keys');
+        return false;
+      }
+      
+      return true;
+    }
+    
+    // Client-side keys validation
     const { openaiApiKey, pineconeApiKey, pineconeEnvironment, pineconeIndexName } = chatSettings;
     
     if (!openaiApiKey) {
@@ -98,6 +114,13 @@ const ChatInterface = ({ chatSettings, keysAvailable }: ChatInterfaceProps) => {
 
   const handleSend = async () => {
     if (!input.trim()) return;
+    
+    console.log("Handle send called", { 
+      keysAvailable,
+      pineconeEnv: chatSettings.pineconeEnvironment,
+      pineconeIndex: chatSettings.pineconeIndexName 
+    });
+    
     if (!validateSettings()) return;
     
     const userMessage = { role: 'user' as const, content: input };
@@ -106,6 +129,7 @@ const ChatInterface = ({ chatSettings, keysAvailable }: ChatInterfaceProps) => {
     setIsLoading(true);
 
     try {
+      console.log("Sending message to chat service");
       // Send message using the chat service
       const response = await sendChatMessage(
         userMessage.content,
@@ -114,6 +138,7 @@ const ChatInterface = ({ chatSettings, keysAvailable }: ChatInterfaceProps) => {
         keysAvailable
       );
       
+      console.log("Received response from chat service");
       const assistantMessage = { 
         role: 'assistant' as const, 
         content: response 
@@ -134,6 +159,15 @@ const ChatInterface = ({ chatSettings, keysAvailable }: ChatInterfaceProps) => {
       handleSend();
     }
   };
+
+  // For debugging
+  useEffect(() => {
+    console.log("ChatInterface mounted with props:", { 
+      keysAvailable, 
+      envSet: Boolean(chatSettings.pineconeEnvironment),
+      indexSet: Boolean(chatSettings.pineconeIndexName)
+    });
+  }, [keysAvailable, chatSettings]);
 
   return (
     <div className="flex flex-col h-full">
