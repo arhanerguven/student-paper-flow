@@ -26,7 +26,14 @@ export function GPTOutput({ markdown }: GPTOutputProps) {
     .replace(/\$\$ (.*?) \$\$/g, '$$$$1$$')
     // Handle LaTeX expressions that might not be correctly formatted
     .replace(/\(\\theta_([a-z0-9])\)/g, '$\\theta_{$1}$')
-    .replace(/\\theta_([a-z0-9])/g, '\\theta_{$1}');
+    .replace(/\\theta_([a-z0-9])/g, '\\theta_{$1}')
+    // Handle common LaTeX patterns in machine learning notation
+    .replace(/\(\\theta_\{([^}]+)\}\)/g, '$\\theta_{$1}$')
+    .replace(/\(\\eta\)/g, '$\\eta$')
+    .replace(/\(L\(\\theta_\{([^}]+)\}; ([^)]+)\)\)/g, '$L(\\theta_{$1}; $2)$')
+    .replace(/\(\\nabla L\(\\theta_\{([^}]+)\}; ([^)]+)\)\)/g, '$\\nabla L(\\theta_{$1}; $2)$')
+    // Handle parentheses in LaTeX
+    .replace(/\(\(([^)]+)\)\)/g, '($1)');
 
   return (
     <div className="katex-wrapper">
