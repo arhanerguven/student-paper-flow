@@ -125,7 +125,13 @@
 .katex-output-container {
   width: 100%;
   overflow: hidden;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
+}
+
+/* KaTeX scroll area */
+.katex-scroll-area {
+  width: 100%;
+  max-height: none;
 }
 
 /* KaTeX specific styles */
@@ -133,14 +139,14 @@
   width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
-  padding: 0.75rem 0;
+  padding: 1rem 0;
   max-width: 100%;
   scrollbar-width: thin;
-  line-height: 1.7;
+  line-height: 1.8;
 }
 
 .katex-wrapper .katex {
-  font-size: 1.2em;
+  font-size: 1.25em;
   text-rendering: auto;
   max-width: 100%;
 }
@@ -148,8 +154,8 @@
 .katex-display {
   overflow-x: auto;
   overflow-y: hidden;
-  padding: 1.25em 0;
-  margin: 1.5em 0;
+  padding: 1.5em 0;
+  margin: 2em 0;
   max-width: 100%;
 }
 
@@ -158,9 +164,9 @@
   display: block;
   overflow-x: auto;
   margin: 2em 0;
-  padding: 1.5em 0.5em;
+  padding: 2em 1em;
   max-width: 100%;
-  background-color: rgba(0, 0, 0, 0.03);
+  background-color: rgba(0, 0, 0, 0.04);
   border-radius: 8px;
   text-align: center;
 }
@@ -168,8 +174,8 @@
 .math-inline {
   display: inline-block;
   vertical-align: middle;
-  padding: 0 0.3em;
-  margin: 0 0.15em;
+  padding: 0 0.4em;
+  margin: 0 0.2em;
 }
 
 pre.math {
@@ -179,7 +185,7 @@ pre.math {
 }
 
 code.math.math-inline {
-  padding: 0 0.3em;
+  padding: 0 0.4em;
 }
 
 /* Ensure display math equations are centered */
@@ -191,7 +197,7 @@ code.math.math-inline {
 
 /* Ensure the LaTeX equations have proper spacing */
 .katex-display {
-  margin: 2em 0;
+  margin: 2.5em 0;
 }
 
 /* Fix for block equations */
@@ -208,28 +214,44 @@ div[class*="math-display"] {
 
 /* Proper alignment for nabla and other operators */
 .katex .mop {
-  margin-right: 0.2em;
+  margin-right: 0.25em;
 }
 
 /* Better spacing for fractions */
 .katex .mfrac {
-  margin: 0.25em 0.15em;
+  margin: 0.35em 0.2em;
 }
 
 /* Special formatting for matrices */
 .katex .bmatrix {
-  margin: 0.5em 0;
+  margin: 0.6em 0;
 }
 
 /* Ensure proper scrolling for the chat interface */
 .chat-message {
   position: relative;
   width: 100%;
-  line-height: 1.7;
+  line-height: 1.8;
 }
 
 .chat-message p {
-  margin-bottom: 1.5em;
+  margin-bottom: 1.8em;
+}
+
+/* High-quality rendering for math */
+.katex {
+  font-feature-settings: "kern" 1;
+  text-rendering: optimizeLegibility;
+}
+
+/* Improve spacing for subscripts and superscripts */
+.katex .msubsup {
+  margin: 0 0.2em;
+}
+
+/* Improve spacing for math operators */
+.katex .mbin, .katex .mrel {
+  margin: 0 0.3em;
 }
 
 /* Custom scrollbar styles */
