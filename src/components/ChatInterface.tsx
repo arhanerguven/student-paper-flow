@@ -20,7 +20,7 @@ const MarkdownWithMath = ({ children }: { children: string }) => {
   }, [children]);
   
   return (
-    <div ref={containerRef}>
+    <div ref={containerRef} className="prose prose-sm max-w-none dark:prose-invert">
       <ReactMarkdown>{children}</ReactMarkdown>
     </div>
   );
@@ -56,15 +56,17 @@ const ChatInterface = ({ chatSettings, keysAvailable }: ChatInterfaceProps) => {
     }
   }, [messages]);
 
-  // Scroll to bottom of chat when messages update
+  // Scroll to bottom of chat when messages update and trigger MathJax rendering
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    // Trigger MathJax rendering after messages are updated
+    
+    // Enhanced LaTeX rendering with a slightly longer delay to ensure content is loaded
     setTimeout(() => {
       if (typeof window !== 'undefined' && window.renderMath) {
+        console.log('Re-rendering LaTeX content');
         window.renderMath();
       }
-    }, 100);
+    }, 200);
   }, [messages]);
 
   const handleSend = async () => {
@@ -107,6 +109,12 @@ const ChatInterface = ({ chatSettings, keysAvailable }: ChatInterfaceProps) => {
     }
   };
 
+  const clearChat = () => {
+    setMessages([]);
+    localStorage.removeItem('chatHistory');
+    toast.success('Chat history cleared');
+  };
+
   return (
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto mb-4 space-y-4 p-4">
@@ -118,25 +126,37 @@ const ChatInterface = ({ chatSettings, keysAvailable }: ChatInterfaceProps) => {
             </div>
           </div>
         ) : (
-          messages.map((msg, idx) => (
-            <div
-              key={idx}
-              className={`flex items-start gap-3 ${
-                msg.role === 'assistant' ? 'bg-muted/50 rounded-lg p-3' : 'p-2'
-              }`}
-            >
-              <div className={`p-1.5 rounded-md ${msg.role === 'assistant' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
-                {msg.role === 'assistant' ? <Bot size={16} /> : <User size={16} />}
-              </div>
-              <div className="text-sm whitespace-pre-wrap">
-                {msg.role === 'assistant' ? (
-                  <MarkdownWithMath>{msg.content}</MarkdownWithMath>
-                ) : (
-                  msg.content
-                )}
-              </div>
+          <>
+            <div className="flex justify-end mb-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={clearChat}
+                className="text-xs"
+              >
+                Clear Chat
+              </Button>
             </div>
-          ))
+            {messages.map((msg, idx) => (
+              <div
+                key={idx}
+                className={`flex items-start gap-3 ${
+                  msg.role === 'assistant' ? 'bg-muted/50 rounded-lg p-3' : 'p-2'
+                }`}
+              >
+                <div className={`p-1.5 rounded-md ${msg.role === 'assistant' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+                  {msg.role === 'assistant' ? <Bot size={16} /> : <User size={16} />}
+                </div>
+                <div className="text-sm whitespace-pre-wrap w-full">
+                  {msg.role === 'assistant' ? (
+                    <MarkdownWithMath>{msg.content}</MarkdownWithMath>
+                  ) : (
+                    msg.content
+                  )}
+                </div>
+              </div>
+            ))}
+          </>
         )}
         <div ref={messagesEndRef} />
       </div>
