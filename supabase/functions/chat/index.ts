@@ -1,6 +1,5 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -18,48 +17,12 @@ serve(async (req) => {
     
     // Get API keys from environment variables
     const OPENAI_KEY = Deno.env.get('OPENAI_API_KEY');
-    const PINECONE_API_KEY = Deno.env.get('PINECONE_API_KEY');
-    const PINECONE_ENVIRONMENT = Deno.env.get('PINECONE_ENVIRONMENT');
-    const PINECONE_INDEX_NAME = Deno.env.get('PINECONE_INDEX_NAME');
     
     // Validate required keys
     if (!OPENAI_KEY) {
       console.error("Missing OpenAI API key in server environment");
       return new Response(
         JSON.stringify({ error: 'OpenAI API key not configured on server' }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
-    }
-    
-    if (!PINECONE_API_KEY) {
-      console.error("Missing Pinecone API key in server environment");
-      return new Response(
-        JSON.stringify({ error: 'Pinecone API key not configured on server' }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
-    }
-    
-    if (!PINECONE_ENVIRONMENT) {
-      console.error("Missing Pinecone environment in server environment");
-      return new Response(
-        JSON.stringify({ error: 'Pinecone environment not configured on server' }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
-    }
-    
-    if (!PINECONE_INDEX_NAME) {
-      console.error("Missing Pinecone index name in server environment");
-      return new Response(
-        JSON.stringify({ error: 'Pinecone index name not configured on server' }),
         { 
           status: 400, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
