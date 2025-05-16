@@ -15,6 +15,15 @@ export function GPTOutput({ markdown }: GPTOutputProps) {
       <ReactMarkdown
         remarkPlugins={[remarkMath]}
         rehypePlugins={[rehypeKatex]}
+        components={{
+          // Override how math is rendered to ensure it works
+          math: ({ value }) => (
+            <div dangerouslySetInnerHTML={{ __html: value }} />
+          ),
+          inlineMath: ({ value }) => (
+            <span dangerouslySetInnerHTML={{ __html: value }} />
+          ),
+        }}
       >
         {markdown}
       </ReactMarkdown>

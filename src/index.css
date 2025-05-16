@@ -116,3 +116,14 @@
   padding: 0.5em 0;
   margin: 0.5em 0;
 }
+
+/* Additional KaTeX fixes */
+.math-display {
+  display: block;
+  overflow-x: auto;
+  margin: 1em 0;
+}
+
+.math-inline {
+  display: inline-block;
+}
