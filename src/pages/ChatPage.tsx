@@ -1,19 +1,8 @@
 
-import { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import ChatInterface from '@/components/ChatInterface';
 
 const ChatPage = () => {
-  const [apiKey, setApiKey] = useState<string | undefined>(undefined);
-
-  // Load API key from localStorage on component mount
-  useEffect(() => {
-    const savedApiKey = localStorage.getItem('openai_api_key');
-    if (savedApiKey) {
-      setApiKey(savedApiKey);
-    }
-  }, []);
-
   return (
     <div className="flex flex-col h-screen">
       <Navbar />
@@ -24,7 +13,7 @@ const ChatPage = () => {
         </p>
         
         <div className="flex-1 border rounded-lg overflow-hidden flex flex-col">
-          <ChatInterface apiKey={apiKey} />
+          <ChatInterface />
         </div>
       </main>
     </div>
