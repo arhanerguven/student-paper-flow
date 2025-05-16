@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import ReactMarkdown from 'react-markdown';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ChatSettings {
   openaiApiKey: string;
@@ -43,9 +44,10 @@ const MarkdownWithMath = ({ children }: { children: string }) => {
 
 interface ChatInterfaceProps {
   chatSettings: ChatSettings;
+  keysAvailable: boolean;
 }
 
-const ChatInterface = ({ chatSettings }: ChatInterfaceProps) => {
+const ChatInterface = ({ chatSettings, keysAvailable }: ChatInterfaceProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -82,6 +84,8 @@ const ChatInterface = ({ chatSettings }: ChatInterfaceProps) => {
   }, [messages]);
 
   const validateSettings = () => {
+    if (keysAvailable) return true;
+    
     const { openaiApiKey, pineconeApiKey, pineconeEnvironment, pineconeIndexName } = chatSettings;
     
     if (!openaiApiKey) {
@@ -123,20 +127,33 @@ const ChatInterface = ({ chatSettings }: ChatInterfaceProps) => {
         content: msg.content
       }));
 
+      let body;
+      
+      if (keysAvailable) {
+        // If keys are available on server, don't send them in the request
+        body = JSON.stringify({
+          message: userMessage.content.trim(),
+          chat_history: chatHistory
+        });
+      } else {
+        // If using client-side keys, send them in the request
+        body = JSON.stringify({
+          message: userMessage.content.trim(),
+          openai_api_key: chatSettings.openaiApiKey,
+          pinecone_api_key: chatSettings.pineconeApiKey,
+          pinecone_environment: chatSettings.pineconeEnvironment,
+          pinecone_index_name: chatSettings.pineconeIndexName,
+          chat_history: chatHistory
+        });
+      }
+
       // Call the external API
       const response = await fetch('https://example-77lt.onrender.com/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          message: input.trim(),
-          openai_api_key: chatSettings.openaiApiKey,
-          pinecone_api_key: chatSettings.pineconeApiKey,
-          pinecone_environment: chatSettings.pineconeEnvironment,
-          pinecone_index_name: chatSettings.pineconeIndexName,
-          chat_history: chatHistory
-        }),
+        body
       });
 
       if (!response.ok) {
