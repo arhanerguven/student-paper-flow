@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { SendIcon, Bot, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -77,6 +78,22 @@ const ChatInterface = () => {
     }
   };
 
+  // Create a custom component to render math content
+  const MarkdownWithMath = ({ children }: { children: string }) => {
+    // After React renders the markdown, trigger MathJax
+    useEffect(() => {
+      if (window.renderMath) {
+        window.renderMath();
+      }
+    }, [children]);
+
+    return (
+      <ReactMarkdown>
+        {children}
+      </ReactMarkdown>
+    );
+  };
+
   return (
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto mb-4 space-y-4 p-4">
@@ -99,9 +116,9 @@ const ChatInterface = () => {
                 {msg.role === 'assistant' ? <Bot size={16} /> : <User size={16} />}
               </div>
               <div className="text-sm prose prose-sm max-w-none dark:prose-invert">
-                <ReactMarkdown>
+                <MarkdownWithMath>
                   {msg.content}
-                </ReactMarkdown>
+                </MarkdownWithMath>
               </div>
             </div>
           ))
