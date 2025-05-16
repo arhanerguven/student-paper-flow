@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { SendIcon, Bot, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -19,6 +20,7 @@ const ChatInterface = ({ chatSettings, keysAvailable }: ChatInterfaceProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [shouldScrollToBottom, setShouldScrollToBottom] = useState(true);
 
   // Load chat history from localStorage
   useEffect(() => {
@@ -41,16 +43,28 @@ const ChatInterface = ({ chatSettings, keysAvailable }: ChatInterfaceProps) => {
 
   // Scroll to bottom of chat when messages update
   useEffect(() => {
+    if (!shouldScrollToBottom) return;
+    
     // Use a timeout to ensure the DOM has updated before scrolling
     const timeoutId = setTimeout(() => {
       if (scrollContainerRef.current) {
         scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
       }
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
+      if (messagesEndRef.current) {
+        messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 200); // Increased delay for complex content
     
     return () => clearTimeout(timeoutId);
-  }, [messages]);
+  }, [messages, shouldScrollToBottom]);
+
+  const handleScroll = () => {
+    if (!scrollContainerRef.current) return;
+    
+    const { scrollHeight, scrollTop, clientHeight } = scrollContainerRef.current;
+    const isAtBottom = Math.abs(scrollHeight - scrollTop - clientHeight) < 50;
+    setShouldScrollToBottom(isAtBottom);
+  };
 
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -58,6 +72,7 @@ const ChatInterface = ({ chatSettings, keysAvailable }: ChatInterfaceProps) => {
     const userMessage = { role: 'user' as const, content: input };
     setMessages(prev => [...prev, userMessage]);
     setInput('');
+    setShouldScrollToBottom(true);
     setIsLoading(true);
 
     try {
@@ -108,6 +123,7 @@ const ChatInterface = ({ chatSettings, keysAvailable }: ChatInterfaceProps) => {
       <div 
         ref={scrollContainerRef}
         className="flex-1 overflow-y-auto mb-4 space-y-4 p-4 chat-messages-container"
+        onScroll={handleScroll}
       >
         {messages.length === 0 ? (
           <div className="text-center text-muted-foreground h-full flex items-center justify-center">

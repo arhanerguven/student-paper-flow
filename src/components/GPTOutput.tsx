@@ -32,8 +32,8 @@ export function GPTOutput({ markdown }: GPTOutputProps) {
     .replace(/\\frac/g, '\\frac');
 
   return (
-    <div className="katex-wrapper">
-      <ScrollArea className="overflow-visible">
+    <div className="katex-output-container">
+      <div className="katex-wrapper">
         <ReactMarkdown
           remarkPlugins={[remarkMath]}
           rehypePlugins={[rehypeKatex]}
@@ -60,7 +60,7 @@ export function GPTOutput({ markdown }: GPTOutputProps) {
         >
           {processedMarkdown}
         </ReactMarkdown>
-      </ScrollArea>
+      </div>
     </div>
   );
 }
