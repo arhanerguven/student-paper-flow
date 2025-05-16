@@ -19,6 +19,7 @@ serve(async (req) => {
     // Get API keys from environment variables
     const OPENAI_KEY = Deno.env.get('OPENAI_API_KEY');
     const PINECONE_API_KEY = Deno.env.get('PINECONE_API_KEY');
+    const PINECONE_ENVIRONMENT = Deno.env.get('PINECONE_ENVIRONMENT');
     
     // Validate required keys
     if (!OPENAI_KEY) {
@@ -43,15 +44,10 @@ serve(async (req) => {
       );
     }
     
-    // Get request data
-    const requestData = await req.json();
-    const { message, chat_history = [], pinecone_environment, pinecone_index_name } = requestData;
-    
-    // Validate Pinecone environment and index
-    if (!pinecone_environment) {
-      console.error("Missing Pinecone environment in request");
+    if (!PINECONE_ENVIRONMENT) {
+      console.error("Missing Pinecone environment in server environment");
       return new Response(
-        JSON.stringify({ error: 'Pinecone environment not found in request' }),
+        JSON.stringify({ error: 'Pinecone environment not configured on server' }),
         { 
           status: 400, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -59,6 +55,11 @@ serve(async (req) => {
       );
     }
     
+    // Get request data
+    const requestData = await req.json();
+    const { message, chat_history = [], pinecone_index_name } = requestData;
+    
+    // Validate Pinecone index
     if (!pinecone_index_name) {
       console.error("Missing Pinecone index name in request");
       return new Response(

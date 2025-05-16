@@ -25,7 +25,6 @@ export const sendChatMessage = async (
         role: msg.role,
         content: msg.content
       })),
-      pinecone_environment: chatSettings.pineconeEnvironment,
       pinecone_index_name: chatSettings.pineconeIndexName
     };
     
