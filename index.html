@@ -43,7 +43,11 @@
             window.renderMath = () => {
               if (window.MathJax && window.MathJax.typeset) {
                 console.log('Re-rendering LaTeX content');
-                window.MathJax.typeset();
+                try {
+                  window.MathJax.typeset();
+                } catch (error) {
+                  console.error('Error in MathJax typeset:', error);
+                }
               }
             };
             console.log('MathJax ready');

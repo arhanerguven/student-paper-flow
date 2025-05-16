@@ -15,7 +15,13 @@ const MarkdownWithMath = ({ children }: { children: string }) => {
   useEffect(() => {
     // Render math after markdown is rendered
     if (typeof window !== 'undefined' && window.renderMath && containerRef.current) {
-      setTimeout(() => typeof window !== 'undefined' && window.renderMath?.(), 100);
+      // Process LaTeX with a delay to ensure content is properly loaded
+      setTimeout(() => {
+        if (typeof window !== 'undefined' && window.renderMath) {
+          console.log('Processing LaTeX content in MarkdownWithMath');
+          window.renderMath();
+        }
+      }, 200);
     }
   }, [children]);
   
@@ -63,10 +69,10 @@ const ChatInterface = ({ chatSettings, keysAvailable }: ChatInterfaceProps) => {
     // Enhanced LaTeX rendering with a slightly longer delay to ensure content is loaded
     setTimeout(() => {
       if (typeof window !== 'undefined' && window.renderMath) {
-        console.log('Re-rendering LaTeX content');
+        console.log('Re-rendering LaTeX content after messages update');
         window.renderMath();
       }
-    }, 200);
+    }, 300); // Increased delay for better rendering chances
   }, [messages]);
 
   const handleSend = async () => {
@@ -94,6 +100,14 @@ const ChatInterface = ({ chatSettings, keysAvailable }: ChatInterfaceProps) => {
       };
       
       setMessages(prev => [...prev, assistantMessage]);
+      
+      // Force MathJax rendering after response is received
+      setTimeout(() => {
+        if (typeof window !== 'undefined' && window.renderMath) {
+          console.log('Forcing LaTeX rendering after response');
+          window.renderMath();
+        }
+      }, 100);
     } catch (error) {
       console.error('Error calling chat API:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to communicate with the chat service');
@@ -115,6 +129,11 @@ const ChatInterface = ({ chatSettings, keysAvailable }: ChatInterfaceProps) => {
     toast.success('Chat history cleared');
   };
 
+  const showLatexExample = () => {
+    const exampleLatex = "Here are some LaTeX examples:\n\nInline math: $x^2 + y^2 = z^2$\n\nDisplay math: $$\\frac{d}{dx}x^2 = 2x$$\n\nMore complex: $$\\int_{0}^{\\infty} e^{-x^2} dx = \\frac{\\sqrt{\\pi}}{2}$$";
+    setInput(exampleLatex);
+  };
+
   return (
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto mb-4 space-y-4 p-4">
@@ -122,7 +141,10 @@ const ChatInterface = ({ chatSettings, keysAvailable }: ChatInterfaceProps) => {
           <div className="text-center text-muted-foreground h-full flex items-center justify-center">
             <div>
               <Bot className="mx-auto h-12 w-12 mb-2 opacity-50" />
-              <p>Ask me anything about your documents! I can render math like $E=mc^2$ too.</p>
+              <p className="mb-4">Ask me anything about your documents! I can render math like $E=mc^2$ too.</p>
+              <Button variant="outline" size="sm" onClick={showLatexExample}>
+                Show LaTeX Example
+              </Button>
             </div>
           </div>
         ) : (
