@@ -4,33 +4,9 @@ import { SendIcon, Bot, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import ReactMarkdown from 'react-markdown';
 import { ChatSettings, Message } from '@/types/chat';
 import { sendChatMessage } from '@/services/chatService';
-
-// Custom component to handle markdown and math rendering
-const MarkdownWithMath = ({ children }: { children: string }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  
-  useEffect(() => {
-    // Render math after markdown is rendered
-    if (typeof window !== 'undefined' && window.renderMath && containerRef.current) {
-      // Process LaTeX with a delay to ensure content is properly loaded
-      setTimeout(() => {
-        if (typeof window !== 'undefined' && window.renderMath) {
-          console.log('Processing LaTeX content in MarkdownWithMath');
-          window.renderMath();
-        }
-      }, 200);
-    }
-  }, [children]);
-  
-  return (
-    <div ref={containerRef} className="prose prose-sm max-w-none dark:prose-invert">
-      <ReactMarkdown>{children}</ReactMarkdown>
-    </div>
-  );
-};
+import GPTOutput from './GPTOutput';
 
 interface ChatInterfaceProps {
   chatSettings: ChatSettings;
@@ -62,17 +38,9 @@ const ChatInterface = ({ chatSettings, keysAvailable }: ChatInterfaceProps) => {
     }
   }, [messages]);
 
-  // Scroll to bottom of chat when messages update and trigger MathJax rendering
+  // Scroll to bottom of chat when messages update
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    
-    // Enhanced LaTeX rendering with a slightly longer delay to ensure content is loaded
-    setTimeout(() => {
-      if (typeof window !== 'undefined' && window.renderMath) {
-        console.log('Re-rendering LaTeX content after messages update');
-        window.renderMath();
-      }
-    }, 300); // Increased delay for better rendering chances
   }, [messages]);
 
   const handleSend = async () => {
@@ -100,14 +68,6 @@ const ChatInterface = ({ chatSettings, keysAvailable }: ChatInterfaceProps) => {
       };
       
       setMessages(prev => [...prev, assistantMessage]);
-      
-      // Force MathJax rendering after response is received
-      setTimeout(() => {
-        if (typeof window !== 'undefined' && window.renderMath) {
-          console.log('Forcing LaTeX rendering after response');
-          window.renderMath();
-        }
-      }, 100);
     } catch (error) {
       console.error('Error calling chat API:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to communicate with the chat service');
@@ -169,9 +129,11 @@ const ChatInterface = ({ chatSettings, keysAvailable }: ChatInterfaceProps) => {
                 <div className={`p-1.5 rounded-md ${msg.role === 'assistant' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
                   {msg.role === 'assistant' ? <Bot size={16} /> : <User size={16} />}
                 </div>
-                <div className="text-sm whitespace-pre-wrap w-full">
+                <div className="text-sm w-full">
                   {msg.role === 'assistant' ? (
-                    <MarkdownWithMath>{msg.content}</MarkdownWithMath>
+                    <div className="prose prose-sm max-w-none dark:prose-invert">
+                      <GPTOutput markdown={msg.content} />
+                    </div>
                   ) : (
                     msg.content
                   )}
