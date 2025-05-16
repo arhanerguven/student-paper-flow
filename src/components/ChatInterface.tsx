@@ -3,15 +3,14 @@ import { useState, useEffect, useRef } from 'react';
 import { SendIcon, Bot, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
+import ReactMarkdown from 'react-markdown';
 
-// Declare the renderMath function on window
-declare global {
-  interface Window {
-    renderMath?: () => void;
-  }
+interface ChatSettings {
+  openaiApiKey: string;
+  pineconeApiKey: string;
+  pineconeEnvironment: string;
+  pineconeIndexName: string;
 }
 
 interface Message {
@@ -19,11 +18,57 @@ interface Message {
   content: string;
 }
 
-const ChatInterface = () => {
+interface ChatResponse {
+  response: string;
+  chat_history: Array<{ role: string; content: string }>;
+}
+
+// Custom component to handle markdown and math rendering
+const MarkdownWithMath = ({ children }: { children: string }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    // Render math after markdown is rendered
+    if (window.renderMath && containerRef.current) {
+      setTimeout(() => window.renderMath?.(), 100);
+    }
+  }, [children]);
+  
+  return (
+    <div ref={containerRef}>
+      <ReactMarkdown>{children}</ReactMarkdown>
+    </div>
+  );
+};
+
+interface ChatInterfaceProps {
+  chatSettings: ChatSettings;
+}
+
+const ChatInterface = ({ chatSettings }: ChatInterfaceProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Load chat history from localStorage
+  useEffect(() => {
+    const savedMessages = localStorage.getItem('chatHistory');
+    if (savedMessages) {
+      try {
+        setMessages(JSON.parse(savedMessages));
+      } catch (error) {
+        console.error('Error parsing saved chat history:', error);
+      }
+    }
+  }, []);
+
+  // Save chat history to localStorage when messages change
+  useEffect(() => {
+    if (messages.length > 0) {
+      localStorage.setItem('chatHistory', JSON.stringify(messages));
+    }
+  }, [messages]);
 
   // Scroll to bottom of chat when messages update
   useEffect(() => {
@@ -36,8 +81,35 @@ const ChatInterface = () => {
     }, 100);
   }, [messages]);
 
+  const validateSettings = () => {
+    const { openaiApiKey, pineconeApiKey, pineconeEnvironment, pineconeIndexName } = chatSettings;
+    
+    if (!openaiApiKey) {
+      toast.error('OpenAI API key is required');
+      return false;
+    }
+    
+    if (!pineconeApiKey) {
+      toast.error('Pinecone API key is required');
+      return false;
+    }
+    
+    if (!pineconeEnvironment) {
+      toast.error('Pinecone environment is required');
+      return false;
+    }
+    
+    if (!pineconeIndexName) {
+      toast.error('Pinecone index name is required');
+      return false;
+    }
+    
+    return true;
+  };
+
   const handleSend = async () => {
     if (!input.trim()) return;
+    if (!validateSettings()) return;
     
     const userMessage = { role: 'user' as const, content: input };
     setMessages(prev => [...prev, userMessage]);
@@ -45,25 +117,42 @@ const ChatInterface = () => {
     setIsLoading(true);
 
     try {
-      // Call our secure Supabase edge function instead of OpenAI directly
-      const { data, error } = await supabase.functions.invoke('chat', {
-        body: { 
-          messages: [...messages, userMessage] 
-        }
+      // Convert previous messages to the format expected by the API
+      const chatHistory = messages.map(msg => ({
+        role: msg.role,
+        content: msg.content
+      }));
+
+      // Call the external API
+      const response = await fetch('https://example-77lt.onrender.com/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: input.trim(),
+          openai_api_key: chatSettings.openaiApiKey,
+          pinecone_api_key: chatSettings.pineconeApiKey,
+          pinecone_environment: chatSettings.pineconeEnvironment,
+          pinecone_index_name: chatSettings.pineconeIndexName,
+          chat_history: chatHistory
+        }),
       });
 
-      if (error) {
-        throw new Error(error.message || 'Failed to get response from server');
+      if (!response.ok) {
+        throw new Error(`Error: ${response.statusText}`);
       }
 
+      const data: ChatResponse = await response.json();
+      
       const assistantMessage = { 
         role: 'assistant' as const, 
-        content: data.choices[0].message.content 
+        content: data.response 
       };
       
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
-      console.error('Error calling chat function:', error);
+      console.error('Error calling chat API:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to communicate with the chat service');
     } finally {
       setIsLoading(false);
@@ -84,7 +173,7 @@ const ChatInterface = () => {
           <div className="text-center text-muted-foreground h-full flex items-center justify-center">
             <div>
               <Bot className="mx-auto h-12 w-12 mb-2 opacity-50" />
-              <p>Ask me anything! I can render math like $E=mc^2$ too.</p>
+              <p>Ask me anything about your documents! I can render math like $E=mc^2$ too.</p>
             </div>
           </div>
         ) : (
@@ -98,7 +187,13 @@ const ChatInterface = () => {
               <div className={`p-1.5 rounded-md ${msg.role === 'assistant' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
                 {msg.role === 'assistant' ? <Bot size={16} /> : <User size={16} />}
               </div>
-              <div className="text-sm whitespace-pre-wrap">{msg.content}</div>
+              <div className="text-sm whitespace-pre-wrap">
+                {msg.role === 'assistant' ? (
+                  <MarkdownWithMath>{msg.content}</MarkdownWithMath>
+                ) : (
+                  msg.content
+                )}
+              </div>
             </div>
           ))
         )}
