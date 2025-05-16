@@ -6,6 +6,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
 
+// Declare the renderMath function on window
+declare global {
+  interface Window {
+    renderMath?: () => void;
+  }
+}
+
 interface Message {
   role: 'user' | 'assistant';
   content: string;
