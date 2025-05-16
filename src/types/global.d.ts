@@ -1,4 +1,5 @@
 
+// Add global types here
 interface Window {
-  renderMath?: () => void;
+  renderMath: (element?: HTMLElement) => void;
 }
