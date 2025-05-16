@@ -87,12 +87,13 @@ export default function FileItem({ document, onDelete }: FileItemProps) {
       const { data: sessionData } = await supabase.auth.getSession();
       const token = sessionData.session?.access_token;
       
+      // Use the constant from the client file instead of accessing the protected property
       const response = await fetch('https://wlkiguhcafvkccinwvbm.supabase.co/functions/v1/convert-pdf-to-markdown', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token || ''}`,
-          'apikey': supabase.supabaseKey,
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indsa2lndWhjYWZ2a2NjaW53dmJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcyNTgyOTQsImV4cCI6MjA2MjgzNDI5NH0.MvTtquF_A0DMp8hxK3-stqIQIGf2JhdiZ13fPmSrrZo',
         },
         body: JSON.stringify({
           pdfUrl: document.url,

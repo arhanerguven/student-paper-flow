@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -95,7 +94,7 @@ export default function FileUploader({ onFileUpload, webhookUrl }: FileUploaderP
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token || ''}`,
-            'apikey': supabase.supabaseKey,
+            'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indsa2lndWhjYWZ2a2NjaW53dmJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcyNTgyOTQsImV4cCI6MjA2MjgzNDI5NH0.MvTtquF_A0DMp8hxK3-stqIQIGf2JhdiZ13fPmSrrZo',
           },
           body: JSON.stringify({
             pdfUrl: publicUrl,
