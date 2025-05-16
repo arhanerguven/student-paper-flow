@@ -19,30 +19,12 @@ interface CodeProps {
 }
 
 export function GPTOutput({ markdown }: GPTOutputProps) {
-  // Enhanced pre-processor to better handle LaTeX expressions
+  // Process the markdown to ensure LaTeX is properly formatted
+  // This is a simple pre-processor to ensure dollar signs are properly handled
   const processedMarkdown = markdown
     // Make sure there are no spaces between $ and the math expression
     .replace(/\$ (.*?) \$/g, '$$$1$$')
-    .replace(/\$\$ (.*?) \$\$/g, '$$$$1$$')
-    // Handle LaTeX expressions that might not be correctly formatted
-    .replace(/\(\\theta_([a-z0-9])\)/g, '$\\theta_{$1}$')
-    .replace(/\\theta_([a-z0-9])/g, '\\theta_{$1}')
-    // Handle common LaTeX patterns in machine learning notation
-    .replace(/\(\\theta_\{([^}]+)\}\)/g, '$\\theta_{$1}$')
-    .replace(/\(\\eta\)/g, '$\\eta$')
-    .replace(/\(L\(\\theta_\{([^}]+)\}; ([^)]+)\)\)/g, '$L(\\theta_{$1}; $2)$')
-    .replace(/\(\\nabla L\(\\theta_\{([^}]+)\}; ([^)]+)\)\)/g, '$\\nabla L(\\theta_{$1}; $2)$')
-    // Handle gradient and nabla notation
-    .replace(/\\nabla L\(\\theta_([a-z0-9])\)/g, '$\\nabla L(\\theta_{$1})$')
-    .replace(/\\nabla L\(\\theta\)/g, '$\\nabla L(\\theta)$')
-    // Handle theta subscripts with t+1 format
-    .replace(/\\theta_\{t\+1\}/g, '$\\theta_{t+1}$')
-    .replace(/\(\\theta_\{t\+1\}\)/g, '$\\theta_{t+1}$')
-    // Handle g_t notation
-    .replace(/g_t/g, '$g_t$')
-    .replace(/\(g_t\)/g, '$g_t$')
-    // Handle parentheses in LaTeX
-    .replace(/\(\(([^)]+)\)\)/g, '($1)');
+    .replace(/\$\$ (.*?) \$\$/g, '$$$$1$$');
 
   return (
     <div className="katex-wrapper">

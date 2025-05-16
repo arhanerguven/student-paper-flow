@@ -126,8 +126,6 @@
 
 .math-inline {
   display: inline-block;
-  padding: 0 0.1em;
-  vertical-align: middle;
 }
 
 pre.math {
@@ -156,48 +154,4 @@ div[class*="math-display"] {
   overflow-x: auto;
   max-width: 100%;
   text-align: center;
-}
-
-/* Improved subscript and superscript rendering */
-.katex .msupsub {
-  text-align: left;
-}
-
-.katex .mord.mtight {
-  vertical-align: 0.2em;
-}
-
-/* Enhanced inline LaTeX styling */
-.math-inline .katex {
-  vertical-align: -0.5ex;
-}
-
-/* Fix for complex LaTeX notation in inline equations */
-.katex .mfrac .frac-line {
-  border-bottom-width: 0.04em;
-}
-
-/* Better spacing for inline math */
-p .math-inline {
-  margin: 0 0.15em;
-}
-
-/* Improve display of gradient notation and multi-character subscripts */
-.katex .mop {
-  margin-right: 0.1em;
-}
-
-/* Better alignment for subscripts with multiple characters */
-.katex .msubsup {
-  vertical-align: -0.1em;
-}
-
-/* Ensure proper spacing around operators in equations */
-.katex .mbin, .katex .mrel {
-  margin: 0 0.15em;
-}
-
-/* Improve spacing in fraction numerators and denominators */
-.katex .mfrac .mnum, .katex .mfrac .mden {
-  padding: 0.1em 0;
 }
