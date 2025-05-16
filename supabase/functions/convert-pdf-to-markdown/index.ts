@@ -32,17 +32,17 @@ serve(async (req) => {
       throw new Error('Mistral API key is not configured');
     }
 
-    // Initialize Mistral client using the correct import and initialization
+    // Initialize Mistral client
     const client = new Mistral({apiKey: mistralApiKey});
 
-    // Process the PDF document using OCR only
+    // Process the PDF document using OCR
     const ocrResponse = await client.ocr.process({
       model: "mistral-ocr-latest",
       document: {
         type: "document_url",
         documentUrl: pdfUrl
       },
-      includeImageBase64: false // Set to true if you want the base64 images
+      includeImageBase64: false
     });
     
     // Log the response structure to help debug

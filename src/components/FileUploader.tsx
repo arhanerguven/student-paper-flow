@@ -85,15 +85,11 @@ export default function FileUploader({ onFileUpload, webhookUrl }: FileUploaderP
       // Automatically extract text from the PDF
       console.log('Automatically extracting text from PDF');
       try {
-        // Get the authentication headers correctly
-        const { data: sessionData } = await supabase.auth.getSession();
-        const token = sessionData.session?.access_token;
-        
+        // Simplified API call - no need for auth token when function has verify_jwt = false
         const extractionResponse = await fetch('https://wlkiguhcafvkccinwvbm.supabase.co/functions/v1/convert-pdf-to-markdown', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token || ''}`,
             'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indsa2lndWhjYWZ2a2NjaW53dmJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcyNTgyOTQsImV4cCI6MjA2MjgzNDI5NH0.MvTtquF_A0DMp8hxK3-stqIQIGf2JhdiZ13fPmSrrZo',
           },
           body: JSON.stringify({
@@ -104,6 +100,7 @@ export default function FileUploader({ onFileUpload, webhookUrl }: FileUploaderP
         
         if (!extractionResponse.ok) {
           const errorText = await extractionResponse.text();
+          console.error("Error response text:", errorText);
           let errorData;
           try {
             errorData = JSON.parse(errorText);
