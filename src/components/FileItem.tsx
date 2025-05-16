@@ -83,10 +83,15 @@ export default function FileItem({ document, onDelete }: FileItemProps) {
     toast.info("Extracting text from PDF...", { duration: 10000 });
 
     try {
+      // Get the authentication headers from Supabase client
+      const { apikey, authorization } = supabase.auth.headers();
+
       const response = await fetch('https://wlkiguhcafvkccinwvbm.supabase.co/functions/v1/convert-pdf-to-markdown', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'apikey': apikey || '',
+          'Authorization': authorization || '',
         },
         body: JSON.stringify({
           pdfUrl: document.url,
@@ -95,8 +100,16 @@ export default function FileItem({ document, onDelete }: FileItemProps) {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to extract text');
+        const errorText = await response.text();
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch (e) {
+          console.error("Could not parse error response as JSON:", errorText);
+          throw new Error(`Error ${response.status}: ${response.statusText}`);
+        }
+        
+        throw new Error(errorData.error || `Failed to extract text: ${response.statusText}`);
       }
 
       const data = await response.json();

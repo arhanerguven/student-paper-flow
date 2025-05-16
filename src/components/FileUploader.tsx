@@ -86,10 +86,15 @@ export default function FileUploader({ onFileUpload, webhookUrl }: FileUploaderP
       // Automatically extract text from the PDF
       console.log('Automatically extracting text from PDF');
       try {
+        // Get the authentication headers from Supabase client
+        const { apikey, authorization } = supabase.auth.headers();
+        
         const extractionResponse = await fetch('https://wlkiguhcafvkccinwvbm.supabase.co/functions/v1/convert-pdf-to-markdown', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'apikey': apikey || '',
+            'Authorization': authorization || '',
           },
           body: JSON.stringify({
             pdfUrl: publicUrl,
@@ -98,8 +103,16 @@ export default function FileUploader({ onFileUpload, webhookUrl }: FileUploaderP
         });
         
         if (!extractionResponse.ok) {
-          const errorData = await extractionResponse.json();
-          throw new Error(errorData.error || 'Failed to extract text');
+          const errorText = await extractionResponse.text();
+          let errorData;
+          try {
+            errorData = JSON.parse(errorText);
+          } catch (e) {
+            console.error("Could not parse error response as JSON:", errorText);
+            throw new Error(`Error ${extractionResponse.status}: ${extractionResponse.statusText}`);
+          }
+          
+          throw new Error(errorData.error || `Failed to extract text: ${extractionResponse.statusText}`);
         }
         
         const extractionData = await extractionResponse.json();
@@ -117,7 +130,7 @@ export default function FileUploader({ onFileUpload, webhookUrl }: FileUploaderP
         console.error('Error extracting text:', extractionError);
         // Even if extraction fails, still upload the document
         onFileUpload(newDocument);
-        toast.warning(`${file.name} uploaded, but text extraction failed`);
+        toast.warning(`${file.name} uploaded, but text extraction failed: ${extractionError.message}`);
       }
 
       // If webhook URL is defined, call it
